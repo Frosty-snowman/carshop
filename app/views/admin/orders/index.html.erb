@@ -1,0 +1,35 @@
+<h1 class="text-2xl font-bold mb-6">ออเดอร์ทั้งหมด</h1>
+
+<div class="flex flex-wrap gap-2 mb-6">
+  <%= link_to "ทั้งหมด", admin_orders_path, class: "rounded-full px-4 py-2 #{params[:status].blank? ? 'bg-slate-900 text-white' : 'bg-white border'}" %>
+  <% Order.statuses.keys.each do |status| %>
+    <%= link_to Order.new(status: status).status_label, admin_orders_path(status: status), class: "rounded-full px-4 py-2 text-sm #{params[:status] == status ? 'bg-slate-900 text-white' : 'bg-white border'}" %>
+  <% end %>
+</div>
+
+<div class="bg-white border rounded-lg overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-left">
+      <tr>
+        <th class="p-3">#</th>
+        <th class="p-3">ลูกค้า</th>
+        <th class="p-3">ยอด</th>
+        <th class="p-3">สถานะ</th>
+        <th class="p-3">วันที่</th>
+        <th class="p-3"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @orders.each do |order| %>
+        <tr class="border-t">
+          <td class="p-3"><%= order.id %></td>
+          <td class="p-3"><%= order.user.name %></td>
+          <td class="p-3"><%= format_baht(order.total_amount) %></td>
+          <td class="p-3"><span class="rounded-full px-2 py-1 text-xs <%= order_status_badge_class(order.status) %>"><%= order.status_label %></span></td>
+          <td class="p-3"><%= l(order.created_at, format: :short) %></td>
+          <td class="p-3 text-right"><%= link_to "ดู", admin_order_path(order), class: "text-indigo-600" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

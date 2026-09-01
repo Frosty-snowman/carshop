@@ -1,0 +1,44 @@
+<%= link_to "← กลับ", products_path, class: "text-sm text-slate-600 mb-4 inline-block" %>
+
+<div class="grid lg:grid-cols-2 gap-8">
+  <div class="bg-white rounded-xl border overflow-hidden">
+    <div class="aspect-[3/4] bg-slate-100 flex items-center justify-center">
+      <% if @product.image.attached? %>
+        <%= image_tag @product.image, class: "w-full h-full object-cover" %>
+      <% else %>
+        <span class="text-slate-400">No image</span>
+      <% end %>
+    </div>
+  </div>
+
+  <div>
+    <p class="text-sm text-slate-500"><%= @product.category.name %></p>
+    <h1 class="text-3xl font-bold mt-2"><%= @product.name %></h1>
+    <p class="text-slate-600 mt-4 whitespace-pre-line"><%= @product.description %></p>
+
+    <div class="mt-8 space-y-4">
+      <h2 class="font-semibold">เลือกสภาพ / ภาษา</h2>
+      <% @product.product_variants.order(:condition, :language).each do |variant| %>
+        <div class="bg-white border rounded-lg p-4 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p class="font-medium"><%= variant.display_label %></p>
+            <p class="text-indigo-600"><%= format_baht(variant.price) %></p>
+            <p class="text-sm text-slate-500">คงเหลือ <%= variant.stock_quantity %> ใบ</p>
+          </div>
+
+          <% if user_signed_in? && current_user.customer? && variant.in_stock? %>
+            <%= form_with url: cart_items_path, method: :post, class: "flex items-center gap-2" do |f| %>
+              <%= hidden_field_tag :product_variant_id, variant.id %>
+              <%= number_field_tag :quantity, 1, min: 1, max: variant.stock_quantity, class: "w-16 rounded border px-2 py-1" %>
+              <%= submit_tag "ใส่ตะกร้า", class: "rounded-lg bg-slate-900 text-white px-4 py-2 cursor-pointer" %>
+            <% end %>
+          <% elsif !user_signed_in? %>
+            <p class="text-sm text-slate-500"><%= link_to "Login", new_user_session_path, class: "text-indigo-600" %> เพื่อสั่งซื้อ</p>
+          <% else %>
+            <p class="text-sm text-red-600">หมดสต็อก</p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

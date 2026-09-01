@@ -1,0 +1,31 @@
+<div class="flex justify-between items-center mb-6">
+  <h1 class="text-2xl font-bold">การ์ดทั้งหมด</h1>
+  <%= link_to "เพิ่มการ์ด", new_admin_product_path, class: "rounded-lg bg-slate-900 text-white px-4 py-2" %>
+</div>
+
+<div class="bg-white border rounded-lg overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-slate-50 text-left">
+      <tr>
+        <th class="p-3">ชื่อ</th>
+        <th class="p-3">หมวดหมู่</th>
+        <th class="p-3">Variants</th>
+        <th class="p-3">สต็อกรวม</th>
+        <th class="p-3"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @products.each do |product| %>
+        <tr class="border-t">
+          <td class="p-3 font-medium"><%= product.name %></td>
+          <td class="p-3"><%= product.category.name %></td>
+          <td class="p-3"><%= product.product_variants.count %></td>
+          <td class="p-3"><%= product.product_variants.sum(:stock_quantity) %></td>
+          <td class="p-3 text-right">
+            <%= link_to "จัดการ", admin_product_path(product), class: "text-indigo-600" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

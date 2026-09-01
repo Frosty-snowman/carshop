@@ -1,0 +1,20 @@
+<h1 class="text-2xl font-bold mb-6"><%= @category.new_record? ? "เพิ่มหมวดหมู่" : "แก้ไขหมวดหมู่" %></h1>
+
+<%= form_with model: [:admin, @category], class: "bg-white border rounded-lg p-6 space-y-4 max-w-xl" do |f| %>
+  <% if @category.errors.any? %>
+    <div class="text-red-600 text-sm"><%= @category.errors.full_messages.to_sentence %></div>
+  <% end %>
+  <div>
+    <%= f.label :name, "ชื่อหมวดหมู่", class: "block text-sm mb-1" %>
+    <%= f.text_field :name, class: "w-full rounded border px-3 py-2" %>
+  </div>
+  <div>
+    <%= f.label :description, "คำอธิบาย", class: "block text-sm mb-1" %>
+    <%= f.text_area :description, rows: 3, class: "w-full rounded border px-3 py-2" %>
+  </div>
+  <div>
+    <%= f.label :position, "ลำดับแสดงผล", class: "block text-sm mb-1" %>
+    <%= f.number_field :position, class: "w-full rounded border px-3 py-2" %>
+  </div>
+  <%= f.submit "บันทึก", class: "rounded-lg bg-slate-900 text-white px-6 py-2 cursor-pointer" %>
+<% end %>

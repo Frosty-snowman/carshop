@@ -1,0 +1,16 @@
+<%= link_to product_path(product), class: "block bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-md transition" do %>
+  <div class="aspect-[3/4] bg-slate-100 flex items-center justify-center">
+    <% if product.image.attached? %>
+      <%= image_tag product.image, class: "w-full h-full object-cover" %>
+    <% else %>
+      <span class="text-slate-400">No image</span>
+    <% end %>
+  </div>
+  <div class="p-4">
+    <p class="text-xs text-slate-500"><%= product.category.name %></p>
+    <h3 class="font-semibold text-slate-900 mt-1"><%= product.name %></h3>
+    <% if product.min_price %>
+      <p class="text-indigo-600 font-medium mt-2">เริ่มต้น <%= format_baht(product.min_price) %></p>
+    <% end %>
+  </div>
+<% end %>

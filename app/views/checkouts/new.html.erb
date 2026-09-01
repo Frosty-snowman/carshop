@@ -1,0 +1,66 @@
+<h1 class="text-2xl font-bold mb-6">ชำระเงิน / Checkout</h1>
+
+<div class="grid lg:grid-cols-2 gap-8">
+  <div class="bg-white border rounded-lg p-6">
+    <h2 class="font-semibold mb-4">ที่อยู่จัดส่ง</h2>
+    <%= form_with url: checkout_path, scope: :checkout, class: "space-y-4" do |f| %>
+      <div>
+        <%= f.label :recipient_name, "ชื่อผู้รับ", class: "block text-sm mb-1" %>
+        <%= f.text_field :recipient_name, required: true, class: "w-full rounded border px-3 py-2" %>
+      </div>
+      <div>
+        <%= f.label :phone, "เบอร์โทร", class: "block text-sm mb-1" %>
+        <%= f.text_field :phone, required: true, class: "w-full rounded border px-3 py-2" %>
+      </div>
+      <div>
+        <%= f.label :address, "ที่อยู่", class: "block text-sm mb-1" %>
+        <%= f.text_area :address, required: true, rows: 4, class: "w-full rounded border px-3 py-2" %>
+      </div>
+
+      <div>
+        <p class="font-semibold mb-2">วิธีชำระเงิน</p>
+        <label class="flex items-center gap-2 mb-2">
+          <%= f.radio_button :payment_method, "bank_transfer", checked: true %>
+          โอนบัญชีธนาคาร
+        </label>
+        <label class="flex items-center gap-2">
+          <%= f.radio_button :payment_method, "qr" %>
+          QR Code
+        </label>
+      </div>
+
+      <%= f.submit "ยืนยันคำสั่งซื้อ", class: "rounded-lg bg-slate-900 text-white px-6 py-3 cursor-pointer" %>
+    <% end %>
+  </div>
+
+  <div class="space-y-6">
+    <div class="bg-white border rounded-lg p-6">
+      <h2 class="font-semibold mb-4">สรุปคำสั่งซื้อ</h2>
+      <% @cart_items.each do |item| %>
+        <div class="flex justify-between text-sm py-2 border-b">
+          <span><%= item.product_variant.product.name %> (<%= item.product_variant.display_label %>)</span>
+          <span><%= format_baht(item.subtotal) %></span>
+        </div>
+      <% end %>
+      <div class="flex justify-between font-bold mt-4">
+        <span>รวม</span>
+        <span><%= format_baht(cart_total) %></span>
+      </div>
+    </div>
+
+    <div class="bg-white border rounded-lg p-6">
+      <h2 class="font-semibold mb-4">ข้อมูลโอนเงิน</h2>
+      <p><strong><%= @shop_setting.bank_name %></strong></p>
+      <p>เลขบัญชี: <%= @shop_setting.account_number %></p>
+      <p>ชื่อบัญชี: <%= @shop_setting.account_name %></p>
+      <% if @shop_setting.qr_code.attached? %>
+        <div class="mt-4">
+          <%= image_tag @shop_setting.qr_code, class: "max-w-xs rounded border" %>
+        </div>
+      <% end %>
+      <% if @shop_setting.payment_instructions.present? %>
+        <p class="text-sm text-slate-600 mt-4 whitespace-pre-line"><%= @shop_setting.payment_instructions %></p>
+      <% end %>
+    </div>
+  </div>
+</div>

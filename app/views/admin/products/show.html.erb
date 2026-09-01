@@ -1,0 +1,52 @@
+<div class="flex flex-wrap justify-between gap-4 mb-6">
+  <div>
+    <%= link_to "← กลับ", admin_products_path, class: "text-sm text-slate-600" %>
+    <h1 class="text-2xl font-bold mt-2"><%= @product.name %></h1>
+    <p class="text-slate-600"><%= @product.category.name %></p>
+  </div>
+  <%= link_to "แก้ไขการ์ด", edit_admin_product_path(@product), class: "rounded-lg border px-4 py-2 h-fit" %>
+</div>
+
+<div class="grid lg:grid-cols-3 gap-8">
+  <div class="lg:col-span-1">
+    <% if @product.image.attached? %>
+      <%= image_tag @product.image, class: "w-full rounded-lg border" %>
+    <% end %>
+    <p class="text-sm text-slate-600 mt-4 whitespace-pre-line"><%= @product.description %></p>
+  </div>
+
+  <div class="lg:col-span-2">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="font-semibold text-lg">Variants (สภาพ / ภาษา / ราคา / สต็อก)</h2>
+      <%= link_to "เพิ่ม variant", new_admin_product_product_variant_path(@product), class: "rounded-lg bg-slate-900 text-white px-4 py-2 text-sm" %>
+    </div>
+
+    <div class="bg-white border rounded-lg overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-left">
+          <tr>
+            <th class="p-3">สภาพ</th>
+            <th class="p-3">ภาษา</th>
+            <th class="p-3">ราคา</th>
+            <th class="p-3">สต็อก</th>
+            <th class="p-3"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @product.product_variants.order(:condition, :language).each do |variant| %>
+            <tr class="border-t">
+              <td class="p-3"><%= variant.condition_label %></td>
+              <td class="p-3"><%= variant.language_label %></td>
+              <td class="p-3"><%= format_baht(variant.price) %></td>
+              <td class="p-3"><%= variant.stock_quantity %></td>
+              <td class="p-3 text-right space-x-2">
+                <%= link_to "แก้ไข", edit_admin_product_product_variant_path(@product, variant), class: "text-indigo-600" %>
+                <%= button_to "ลบ", admin_product_product_variant_path(@product, variant), method: :delete, form: { data: { turbo_confirm: "ลบ variant นี้?" } }, class: "text-red-600 inline" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

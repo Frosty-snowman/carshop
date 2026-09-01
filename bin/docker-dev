@@ -1,0 +1,26 @@
+#!/bin/bash -e
+
+cd /rails
+
+rm -f tmp/pids/server.pid
+
+bundle check || bundle install
+
+echo "Waiting for PostgreSQL..."
+until pg_isready -h "${DB_HOST:-db}" -p 5432 -U "${POSTGRES_USER:-carshop}" > /dev/null 2>&1; do
+  sleep 1
+done
+
+if [ "$1" = "start" ]; then
+  bin/rails db:prepare
+
+  if [ ! -f tmp/.seeded ]; then
+    bin/rails db:seed
+    touch tmp/.seeded
+  fi
+
+  export PORT="${PORT:-3000}"
+  exec foreman start -f Procfile.docker.dev
+fi
+
+exec "$@"

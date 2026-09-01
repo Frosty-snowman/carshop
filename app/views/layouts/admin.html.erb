@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Admin - Carshop" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-slate-100 min-h-screen">
+    <header class="bg-slate-900 text-white">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="font-bold text-lg">Carshop Admin</div>
+        <nav class="flex flex-wrap gap-4 text-sm">
+          <%= link_to "Dashboard", admin_root_path, class: "hover:underline" %>
+          <%= link_to "หมวดหมู่", admin_categories_path, class: "hover:underline" %>
+          <%= link_to "การ์ด", admin_products_path, class: "hover:underline" %>
+          <%= link_to "ออเดอร์", admin_orders_path, class: "hover:underline" %>
+          <%= link_to "ชำระเงิน", edit_admin_shop_setting_path, class: "hover:underline" %>
+          <%= link_to "กลับหน้าร้าน", root_path, class: "hover:underline" %>
+        </nav>
+      </div>
+    </header>
+
+    <% if notice.present? %>
+      <div class="max-w-6xl mx-auto px-4 mt-4">
+        <p class="rounded-lg bg-green-50 text-green-800 px-4 py-3 border border-green-200"><%= notice %></p>
+      </div>
+    <% end %>
+    <% if alert.present? %>
+      <div class="max-w-6xl mx-auto px-4 mt-4">
+        <p class="rounded-lg bg-red-50 text-red-800 px-4 py-3 border border-red-200"><%= alert %></p>
+      </div>
+    <% end %>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+      <%= yield %>
+    </main>
+  </body>
+</html>

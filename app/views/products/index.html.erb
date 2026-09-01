@@ -1,0 +1,14 @@
+<h1 class="text-2xl font-bold mb-6">การ์ดทั้งหมด</h1>
+
+<div class="flex flex-wrap gap-3 mb-8">
+  <%= link_to "ทั้งหมด", products_path, class: "rounded-full px-4 py-2 #{params[:category_id].blank? ? 'bg-slate-900 text-white' : 'bg-white border'}" %>
+  <% @categories.each do |category| %>
+    <%= link_to category.name, products_path(category_id: category.id), class: "rounded-full px-4 py-2 #{params[:category_id].to_s == category.id.to_s ? 'bg-slate-900 text-white' : 'bg-white border'}" %>
+  <% end %>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  <% @products.each do |product| %>
+    <%= render "products/card", product: product %>
+  <% end %>
+</div>

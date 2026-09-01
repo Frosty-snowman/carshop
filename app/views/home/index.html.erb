@@ -1,0 +1,34 @@
+<div class="mb-8">
+  <h1 class="text-3xl font-bold text-slate-900">ร้านการ์ด Carshop</h1>
+  <p class="text-slate-600 mt-2">เลือกการ์ดตามหมวดหมู่ สภาพ และภาษา — ต้อง Login ก่อนสั่งซื้อ</p>
+</div>
+
+<% if @categories.any? %>
+  <section class="mb-10">
+    <h2 class="text-xl font-semibold mb-4">หมวดหมู่</h2>
+    <div class="flex flex-wrap gap-3">
+      <% @categories.each do |category| %>
+        <%= link_to products_path(category_id: category.id), class: "rounded-full bg-white border border-slate-200 px-4 py-2 hover:border-slate-400" do %>
+          <%= category.name %>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+<% end %>
+
+<section>
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-xl font-semibold">การ์ดล่าสุด</h2>
+    <%= link_to "ดูทั้งหมด", products_path, class: "text-indigo-600 text-sm" %>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% @products.each do |product| %>
+      <%= render "products/card", product: product %>
+    <% end %>
+  </div>
+
+  <% if @products.empty? %>
+    <p class="text-slate-500">ยังไม่มีการ์ดในสต็อก</p>
+  <% end %>
+</section>

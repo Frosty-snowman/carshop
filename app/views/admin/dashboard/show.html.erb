@@ -1,0 +1,41 @@
+<h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+
+<div class="grid md:grid-cols-2 gap-6 mb-8">
+  <div class="bg-white border rounded-lg p-6">
+    <h2 class="font-semibold mb-4">รอตรวจสอบสลิป (<%= @pending_payments.count %>)</h2>
+    <% @pending_payments.each do |payment| %>
+      <div class="py-3 border-b last:border-0">
+        <%= link_to admin_order_path(payment.order), class: "font-medium text-indigo-600" do %>
+          ออเดอร์ #<%= payment.order.id %> — <%= payment.order.user.name %>
+        <% end %>
+        <p class="text-sm text-slate-500"><%= format_baht(payment.order.total_amount) %></p>
+      </div>
+    <% end %>
+    <% if @pending_payments.empty? %>
+      <p class="text-slate-500 text-sm">ไม่มีรายการรอตรวจสอบ</p>
+    <% end %>
+  </div>
+
+  <div class="bg-white border rounded-lg p-6">
+    <h2 class="font-semibold mb-4">สต็อกใกล้หมด</h2>
+    <% @low_stock_variants.each do |variant| %>
+      <div class="py-2 border-b last:border-0 text-sm">
+        <p class="font-medium"><%= variant.product.name %> — <%= variant.display_label %></p>
+        <p class="text-red-600">เหลือ <%= variant.stock_quantity %> ใบ</p>
+      </div>
+    <% end %>
+    <% if @low_stock_variants.empty? %>
+      <p class="text-slate-500 text-sm">สต็อกปกติ</p>
+    <% end %>
+  </div>
+</div>
+
+<div class="bg-white border rounded-lg p-6">
+  <h2 class="font-semibold mb-4">ออเดอร์ชำระแล้ว รอจัดส่ง</h2>
+  <% @paid_orders.each do |order| %>
+    <div class="py-3 border-b last:border-0 flex justify-between">
+      <%= link_to "ออเดอร์ ##{order.id}", admin_order_path(order), class: "text-indigo-600" %>
+      <span><%= order.user.name %></span>
+    </div>
+  <% end %>
+</div>

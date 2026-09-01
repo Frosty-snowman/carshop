@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: carshop
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: carshop_development
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carshop -d carshop_development"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+      - storage_data:/rails/storage
+    ports:
+      - "3000:3000"
+    environment:
+      RAILS_ENV: development
+      DATABASE_URL: postgres://carshop:password@db:5432/carshop_development
+      DB_HOST: db
+      POSTGRES_USER: carshop
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: carshop_development
+      SECRET_KEY_BASE: development_secret_key_change_in_production
+    depends_on:
+      db:
+        condition: service_healthy
+    tty: true
+    stdin_open: true
+
+volumes:
+  postgres_data:
+  bundle_cache:
+  storage_data:

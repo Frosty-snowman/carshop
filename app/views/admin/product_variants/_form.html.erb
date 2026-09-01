@@ -1,0 +1,25 @@
+<h1 class="text-2xl font-bold mb-2"><%= @variant.new_record? ? "เพิ่ม variant" : "แก้ไข variant" %></h1>
+<p class="text-slate-600 mb-6"><%= @product.name %></p>
+
+<%= form_with model: [:admin, @product, @variant], class: "bg-white border rounded-lg p-6 space-y-4 max-w-xl" do |f| %>
+  <% if @variant.errors.any? %>
+    <div class="text-red-600 text-sm"><%= @variant.errors.full_messages.to_sentence %></div>
+  <% end %>
+  <div>
+    <%= f.label :condition, "สภาพ", class: "block text-sm mb-1" %>
+    <%= f.select :condition, [["สภาพใหม่", "new_condition"], ["สภาพใช้งานแล้ว", "used"]], {}, class: "w-full rounded border px-3 py-2" %>
+  </div>
+  <div>
+    <%= f.label :language, "ภาษา", class: "block text-sm mb-1" %>
+    <%= f.select :language, [["ไทย", "th"], ["English", "en"], ["日本語", "ja"]], {}, class: "w-full rounded border px-3 py-2" %>
+  </div>
+  <div>
+    <%= f.label :price, "ราคา (บาท)", class: "block text-sm mb-1" %>
+    <%= f.number_field :price, step: 0.01, min: 0, class: "w-full rounded border px-3 py-2" %>
+  </div>
+  <div>
+    <%= f.label :stock_quantity, "จำนวนในสต็อก", class: "block text-sm mb-1" %>
+    <%= f.number_field :stock_quantity, min: 0, class: "w-full rounded border px-3 py-2" %>
+  </div>
+  <%= f.submit "บันทึก", class: "rounded-lg bg-slate-900 text-white px-6 py-2 cursor-pointer" %>
+<% end %>
