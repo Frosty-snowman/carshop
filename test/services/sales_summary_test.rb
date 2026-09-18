@@ -16,6 +16,15 @@ class SalesSummaryTest < ActiveSupport::TestCase
     assert_equal 7, @summary.daily_revenue.length
   end
 
+  test "daily_revenue labels use Thai day abbreviations" do
+    I18n.with_locale(:th) do
+      labels = @summary.daily_revenue.map { |day| day[:label] }
+
+      assert labels.all? { |label| !label.include?("Translation missing") }
+      assert labels.all? { |label| label.match?(/\A\S+ \d{2}\/\d{2}\z/) }
+    end
+  end
+
   test "pending_slip_count includes submitted orders" do
     assert @summary.pending_slip_count >= 1
   end
