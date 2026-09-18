@@ -7,7 +7,9 @@ module Admin
     def update
       @shop_setting = ShopSetting.current
       if @shop_setting.update(shop_setting_params)
-        redirect_to edit_admin_shop_setting_path, notice: "บันทึกข้อมูลชำระเงินแล้ว"
+        uploaded_qr = params.dig(:shop_setting, :qr_code)
+        notice = uploaded_qr.respond_to?(:tempfile) ? "บันทึก QR Code แล้ว" : "บันทึกข้อมูลชำระเงินแล้ว"
+        redirect_to edit_admin_shop_setting_path, notice: notice
       else
         render :edit, status: :unprocessable_entity
       end
