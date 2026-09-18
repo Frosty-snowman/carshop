@@ -6,7 +6,7 @@ module Admin
       classes = active ? "#{base} bg-violet-600 text-white shadow-md" : "#{base} text-slate-400 hover:bg-white/5 hover:text-white"
 
       link_to path, class: classes do
-        safe_join([content_tag(:span, icon, class: "text-base w-5 text-center"), label])
+        safe_join([ content_tag(:span, icon, class: "text-base w-5 text-center"), label ])
       end
     end
   end

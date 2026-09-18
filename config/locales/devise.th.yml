@@ -1,0 +1,70 @@
+th:
+  activerecord:
+    models:
+      user: สมาชิก
+    attributes:
+      user:
+        email: อีเมล
+        password: รหัสผ่าน
+        password_confirmation: ยืนยันรหัสผ่าน
+        current_password: รหัสผ่านปัจจุบัน
+        name: ชื่อ-นามสกุล
+  devise:
+    confirmations:
+      confirmed: "ยืนยันอีเมลเรียบร้อยแล้ว"
+      send_instructions: "คุณจะได้รับอีเมลพร้อมวิธียืนยันอีเมลภายในไม่กี่นาที"
+      send_paranoid_instructions: "ถ้าอีเมลนี้อยู่ในระบบ คุณจะได้รับอีเมลพร้อมวิธียืนยันอีเมลภายในไม่กี่นาที"
+    failure:
+      already_authenticated: "คุณเข้าสู่ระบบอยู่แล้ว"
+      inactive: "บัญชีของคุณยังไม่ได้เปิดใช้งาน"
+      invalid: "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+      locked: "บัญชีของคุณถูกล็อก"
+      last_attempt: "คุณมีโอกาสลองอีก 1 ครั้งก่อนบัญชีจะถูกล็อก"
+      not_found_in_database: "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+      timeout: "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่"
+      unauthenticated: "กรุณาเข้าสู่ระบบหรือสมัครสมาชิกก่อน"
+      unconfirmed: "กรุณายืนยันอีเมลก่อนใช้งาน"
+    mailer:
+      confirmation_instructions:
+        subject: "ยืนยันอีเมล Carshop"
+      reset_password_instructions:
+        subject: "รีเซ็ตรหัสผ่าน Carshop"
+      unlock_instructions:
+        subject: "ปลดล็อกบัญชี Carshop"
+      email_changed:
+        subject: "อีเมลของคุณถูกเปลี่ยน"
+      password_change:
+        subject: "รหัสผ่านของคุณถูกเปลี่ยน"
+    passwords:
+      no_token: "ไม่สามารถเข้าหน้านี้ได้โดยตรง กรุณาใช้ลิงก์จากอีเมลรีเซ็ตรหัสผ่าน"
+      send_instructions: "คุณจะได้รับอีเมลพร้อมวิธีรีเซ็ตรหัสผ่านภายในไม่กี่นาที"
+      send_paranoid_instructions: "ถ้าอีเมลนี้อยู่ในระบบ คุณจะได้รับลิงก์รีเซ็ตรหัสผ่านภายในไม่กี่นาที"
+      updated: "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว คุณเข้าสู่ระบบแล้ว"
+      updated_not_active: "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว"
+    registrations:
+      destroyed: "ยกเลิกบัญชีเรียบร้อยแล้ว หวังว่าจะได้พบกันอีก"
+      signed_up: "สมัครสมาชิกเรียบร้อยแล้ว ยินดีต้อนรับ!"
+      signed_up_but_inactive: "สมัครสมาชิกเรียบร้อยแล้ว แต่บัญชียังไม่ได้เปิดใช้งาน"
+      signed_up_but_locked: "สมัครสมาชิกเรียบร้อยแล้ว แต่บัญชีถูกล็อก"
+      signed_up_but_unconfirmed: "ส่งลิงก์ยืนยันไปที่อีเมลแล้ว กรุณาเปิดอีเมลเพื่อยืนยันบัญชี"
+      update_needs_confirmation: "อัปเดตบัญชีแล้ว กรุณายืนยันอีเมลใหม่จากลิงก์ในอีเมล"
+      updated: "อัปเดตบัญชีเรียบร้อยแล้ว"
+      updated_but_not_signed_in: "อัปเดตบัญชีแล้ว กรุณาเข้าสู่ระบบใหม่ด้วยรหัสผ่านใหม่"
+    sessions:
+      signed_in: "เข้าสู่ระบบแล้ว"
+      signed_out: "ออกจากระบบแล้ว"
+      already_signed_out: "ออกจากระบบแล้ว"
+    unlocks:
+      send_instructions: "คุณจะได้รับอีเมลพร้อมวิธีปลดล็อกบัญชีภายในไม่กี่นาที"
+      send_paranoid_instructions: "ถ้าบัญชีนี้อยู่ในระบบ คุณจะได้รับอีเมลปลดล็อกภายในไม่กี่นาที"
+      unlocked: "ปลดล็อกบัญชีแล้ว กรุณาเข้าสู่ระบบ"
+  errors:
+    messages:
+      already_confirmed: "ยืนยันแล้ว กรุณาเข้าสู่ระบบ"
+      confirmation_period_expired: "ลิงก์หมดอายุ กรุณาขอลิงก์ใหม่"
+      expired: "ลิงก์หมดอายุ กรุณาขอใหม่"
+      not_found: "ไม่พบ"
+      not_locked: "ไม่ได้ถูกล็อก"
+      not_saved:
+        one: "พบข้อผิดพลาด 1 รายการ:"
+        other: "พบข้อผิดพลาด %{count} รายการ:"

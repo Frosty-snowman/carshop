@@ -36,6 +36,6 @@ class CartItemsController < ApplicationController
   private
 
   def quantity_param
-    [params.fetch(:quantity, 1).to_i, 1].max
+    [ params.fetch(:quantity, 1).to_i, 1 ].max
   end
 end

@@ -1,16 +1,24 @@
-<h2>Forgot your password?</h2>
+<div class="flex items-center justify-center min-h-[60vh] animate-fade-in-up">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <span class="text-4xl animate-float inline-block mb-4">🔑</span>
+      <h2 class="text-2xl font-bold">ลืมรหัสผ่าน?</h2>
+      <p class="text-white/40 text-sm mt-2">กรอกอีเมลที่ใช้สมัคร เราจะส่งลิงก์รีเซ็ตให้</p>
+    </div>
 
-<%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+    <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post, class: "glass-strong rounded-2xl p-8 space-y-5" }) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
 
-  <div class="field">
-    <p><%= f.label :email %></p>
-    <p><%= f.email_field :email, autofocus: true, autocomplete: "email" %></p>
+      <div>
+        <%= f.label :email, "อีเมล", class: "block text-sm mb-2 text-white/60" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input-field", placeholder: "you@email.com" %>
+      </div>
+
+      <%= f.submit "ส่งลิงก์รีเซ็ตรหัสผ่าน", class: "btn-primary w-full !py-3" %>
+    <% end %>
+
+    <div class="mt-6 text-center text-sm text-white/40">
+      <%= render "devise/shared/links" %>
+    </div>
   </div>
-
-  <div class="actions">
-    <%= f.submit "Send me password reset instructions" %>
-  </div>
-<% end %>
-
-<%= render "devise/shared/links" %>
+</div>

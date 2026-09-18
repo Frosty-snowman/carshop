@@ -1,0 +1,9 @@
+th:
+  errors:
+    messages:
+      blank: "ต้องกรอก"
+      taken: "ถูกใช้ไปแล้ว"
+      too_short: "สั้นเกินไป (อย่างน้อย %{count} ตัวอักษร)"
+      too_long: "ยาวเกินไป (ไม่เกิน %{count} ตัวอักษร)"
+      invalid: "ไม่ถูกต้อง"
+      confirmation: "ไม่ตรงกัน"
