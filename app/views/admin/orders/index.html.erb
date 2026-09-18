@@ -1,35 +1,64 @@
-<h1 class="text-2xl font-bold mb-6">ออเดอร์ทั้งหมด</h1>
+<div class="flex justify-between items-center mb-6 animate-fade-in-up">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-800">ออเดอร์ทั้งหมด</h1>
+    <p class="text-slate-500 text-sm mt-1">คลิก「ดูและดำเนินการ」เพื่ออนุมัติสลิป / กรอกเลขพัสดุ</p>
+  </div>
+</div>
 
 <div class="flex flex-wrap gap-2 mb-6">
-  <%= link_to "ทั้งหมด", admin_orders_path, class: "rounded-full px-4 py-2 #{params[:status].blank? ? 'bg-slate-900 text-white' : 'bg-white border'}" %>
+  <%= link_to "ทั้งหมด", admin_orders_path,
+      class: "rounded-full px-4 py-2 text-sm transition-all #{params[:status].blank? ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-400'}" %>
   <% Order.statuses.keys.each do |status| %>
-    <%= link_to Order.new(status: status).status_label, admin_orders_path(status: status), class: "rounded-full px-4 py-2 text-sm #{params[:status] == status ? 'bg-slate-900 text-white' : 'bg-white border'}" %>
+    <% label = Order.new(status: status).status_label %>
+    <%= link_to label, admin_orders_path(status: status),
+        class: "rounded-full px-4 py-2 text-sm transition-all #{params[:status] == status ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-400'}" %>
   <% end %>
 </div>
 
-<div class="bg-white border rounded-lg overflow-hidden">
+<div class="admin-card overflow-hidden animate-fade-in-up">
   <table class="w-full text-sm">
-    <thead class="bg-slate-50 text-left">
+    <thead class="bg-slate-50 text-left text-slate-500">
       <tr>
-        <th class="p-3">#</th>
-        <th class="p-3">ลูกค้า</th>
-        <th class="p-3">ยอด</th>
-        <th class="p-3">สถานะ</th>
-        <th class="p-3">วันที่</th>
-        <th class="p-3"></th>
+        <th class="p-4 font-medium">#</th>
+        <th class="p-4 font-medium">ลูกค้า</th>
+        <th class="p-4 font-medium">ยอด</th>
+        <th class="p-4 font-medium">สถานะ</th>
+        <th class="p-4 font-medium">ต้องทำ</th>
+        <th class="p-4 font-medium">วันที่</th>
+        <th class="p-4"></th>
       </tr>
     </thead>
     <tbody>
       <% @orders.each do |order| %>
-        <tr class="border-t">
-          <td class="p-3"><%= order.id %></td>
-          <td class="p-3"><%= order.user.name %></td>
-          <td class="p-3"><%= format_baht(order.total_amount) %></td>
-          <td class="p-3"><span class="rounded-full px-2 py-1 text-xs <%= order_status_badge_class(order.status) %>"><%= order.status_label %></span></td>
-          <td class="p-3"><%= l(order.created_at, format: :short) %></td>
-          <td class="p-3 text-right"><%= link_to "ดู", admin_order_path(order), class: "text-indigo-600" %></td>
+        <tr class="border-t border-slate-100 hover:bg-slate-50/80 transition-colors
+          <%= 'bg-amber-50/40' if order.payment_submitted? %>
+          <%= 'bg-violet-50/40' if order.paid? %>">
+          <td class="p-4 font-medium text-slate-800">#<%= order.id %></td>
+          <td class="p-4 text-slate-600"><%= order.user.name %></td>
+          <td class="p-4 text-slate-800"><%= format_baht(order.total_amount) %></td>
+          <td class="p-4">
+            <span class="rounded-full px-2.5 py-1 text-xs font-medium <%= order_status_badge_class(order.status) %>">
+              <%= order.status_label %>
+            </span>
+          </td>
+          <td class="p-4 <%= order_admin_action_class(order) %>">
+            <%= order_admin_action_hint(order) %>
+          </td>
+          <td class="p-4 text-slate-500"><%= l(order.created_at, format: :short) %></td>
+          <td class="p-4 text-right">
+            <%= link_to admin_order_path(order), class: "inline-flex items-center gap-1 rounded-xl px-4 py-2 font-medium transition-all
+              #{order.payment_submitted? ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-md' :
+                order.paid? ? 'bg-violet-600 text-white hover:bg-violet-700 shadow-md' :
+                'text-violet-600 hover:text-violet-800'}" do %>
+              <%= order.payment_submitted? || order.paid? ? "ดำเนินการ →" : "ดู" %>
+            <% end %>
+          </td>
         </tr>
       <% end %>
     </tbody>
   </table>
+
+  <% if @orders.empty? %>
+    <p class="p-8 text-center text-slate-400">ไม่มีออเดอร์</p>
+  <% end %>
 </div>

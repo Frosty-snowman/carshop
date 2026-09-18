@@ -6,6 +6,9 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Use database.yml test config, not the development DATABASE_URL from Docker.
+  ENV.delete("DATABASE_URL")
+
   # While tests run files are not watched, reloading is not necessary.
   config.enable_reloading = false
 

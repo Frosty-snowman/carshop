@@ -1,34 +1,68 @@
-<div class="mb-8">
-  <h1 class="text-3xl font-bold text-slate-900">ร้านการ์ด Carshop</h1>
-  <p class="text-slate-600 mt-2">เลือกการ์ดตามหมวดหมู่ สภาพ และภาษา — ต้อง Login ก่อนสั่งซื้อ</p>
-</div>
+<%# Hero %>
+<section class="relative mb-16 animate-fade-in-up">
+  <div class="glass-strong rounded-3xl p-8 md:p-12 overflow-hidden relative">
+    <div class="absolute inset-0 animate-gradient opacity-30" style="background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(99,102,241,0.1), rgba(251,191,36,0.1));"></div>
+    <div class="relative z-10">
+      <p class="text-violet-400 text-sm font-medium mb-3 tracking-wide uppercase">Trading Card Game Store</p>
+      <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-4">
+        ร้านการ์ด
+        <span class="bg-gradient-to-r from-violet-400 via-indigo-400 to-amber-400 bg-clip-text text-transparent">Carshop</span>
+      </h1>
+      <p class="text-white/60 text-lg max-w-xl mb-8">
+        เลือกการ์ดตามหมวดหมู่ สภาพ และภาษา — สะสม แข่ง แลกเปลี่ยน
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <%= link_to "ดูการ์ดทั้งหมด", products_path, class: "btn-primary" %>
+        <% unless user_signed_in? %>
+          <%= link_to "สมัครสมาชิก", new_user_registration_path, class: "btn-secondary" %>
+        <% end %>
+      </div>
+    </div>
+    <div class="absolute -right-8 -bottom-8 text-[120px] opacity-[0.04] select-none pointer-events-none hidden md:block animate-float">
+      🃏
+    </div>
+  </div>
+</section>
 
+<%# Categories %>
 <% if @categories.any? %>
-  <section class="mb-10">
-    <h2 class="text-xl font-semibold mb-4">หมวดหมู่</h2>
-    <div class="flex flex-wrap gap-3">
-      <% @categories.each do |category| %>
-        <%= link_to products_path(category_id: category.id), class: "rounded-full bg-white border border-slate-200 px-4 py-2 hover:border-slate-400" do %>
-          <%= category.name %>
+  <section class="mb-14 animate-fade-in-up" style="animation-delay: 0.15s">
+    <h2 class="section-title mb-6">หมวดหมู่</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <% @categories.each_with_index do |category, i| %>
+        <% style = category_style(category) %>
+        <%= link_to products_path(category_id: category.id),
+            class: "group glass rounded-2xl p-6 transition-all duration-500 hover:scale-[1.03] hover:border-white/20 bg-gradient-to-br #{style[:gradient]} #{style[:border]} border animate-fade-in-up",
+            style: "animation-delay: #{0.2 + i * 0.1}s" do %>
+          <span class="text-3xl mb-3 block group-hover:scale-110 transition-transform duration-300"><%= style[:emoji] %></span>
+          <h3 class="font-semibold text-lg text-white group-hover:text-white"><%= category.name %></h3>
+          <p class="text-white/40 text-sm mt-1"><%= category.products.count %> การ์ด</p>
+          <span class="inline-block mt-3 text-sm #{style[:text]} opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            ดูทั้งหมด →
+          </span>
         <% end %>
       <% end %>
     </div>
   </section>
 <% end %>
 
-<section>
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-xl font-semibold">การ์ดล่าสุด</h2>
-    <%= link_to "ดูทั้งหมด", products_path, class: "text-indigo-600 text-sm" %>
+<%# Latest products %>
+<section class="animate-fade-in-up" style="animation-delay: 0.3s">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="section-title">การ์ดล่าสุด</h2>
+    <%= link_to "ดูทั้งหมด →", products_path, class: "btn-ghost text-violet-400 hover:text-violet-300" %>
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    <% @products.each do |product| %>
-      <%= render "products/card", product: product %>
+    <% @products.each_with_index do |product, i| %>
+      <%= render "products/card", product: product, index: i %>
     <% end %>
   </div>
 
   <% if @products.empty? %>
-    <p class="text-slate-500">ยังไม่มีการ์ดในสต็อก</p>
+    <div class="glass rounded-2xl p-12 text-center">
+      <span class="text-4xl mb-4 block opacity-30">📦</span>
+      <p class="text-white/40">ยังไม่มีการ์ดในสต็อก</p>
+    </div>
   <% end %>
 </section>

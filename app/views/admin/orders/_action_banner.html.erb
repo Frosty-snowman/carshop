@@ -1,0 +1,60 @@
+<%# Prominent admin action banner — always shows what to do next %>
+<div class="admin-card p-5 mb-6 border-l-4 animate-fade-in-up
+  <%= case order.status
+      when 'payment_submitted' then 'border-amber-400 bg-amber-50/80'
+      when 'paid' then 'border-violet-500 bg-violet-50/80'
+      when 'shipped' then 'border-indigo-500 bg-indigo-50/80'
+      when 'pending_payment' then 'border-yellow-400 bg-yellow-50/80'
+      when 'payment_rejected' then 'border-red-400 bg-red-50/80'
+      else 'border-slate-300 bg-slate-50'
+      end %>">
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1">ขั้นตอนถัดไป — Admin</p>
+      <% case order.status %>
+      <% when "payment_submitted" %>
+        <p class="font-bold text-amber-900 text-lg">💳 ตรวจสอบสลิปและยืนยันการชำระเงิน</p>
+        <p class="text-sm text-amber-800/70 mt-1">ลูกค้าแนบสลิปแล้ว — กดอนุมัติเพื่อเปลี่ยนเป็น「รอจัดส่ง」</p>
+      <% when "paid" %>
+        <p class="font-bold text-violet-900 text-lg">📦 แพ็คของและกรอกเลขพัสดุ</p>
+        <p class="text-sm text-violet-800/70 mt-1">ชำระเงินเรียบร้อยแล้ว — เลือกขนส่งและกรอกเลขพัสดุด้านล่าง</p>
+      <% when "shipped" %>
+        <p class="font-bold text-indigo-900 text-lg">🚚 รอลูกค้ารับของ</p>
+        <p class="text-sm text-indigo-800/70 mt-1">จัดส่งแล้ว — กดปิดออเดอร์เมื่อลูกค้าได้รับสินค้า</p>
+      <% when "pending_payment" %>
+        <p class="font-bold text-yellow-900 text-lg">⏳ รอลูกค้าแนบสลิป</p>
+        <p class="text-sm text-yellow-800/70 mt-1">ลูกค้ายังไม่ได้ส่งหลักฐานการโอน — หรือยืนยันเองถ้าได้รับเงินแล้ว</p>
+      <% when "completed" %>
+        <p class="font-bold text-slate-700 text-lg">✅ ออเดอร์สำเร็จ</p>
+      <% when "payment_rejected" %>
+        <p class="font-bold text-red-900 text-lg">❌ สลิปถูกปฏิเสธ</p>
+        <p class="text-sm text-red-800/70 mt-1">รอลูกค้าแนบสลิปใหม่</p>
+      <% else %>
+        <p class="font-bold text-slate-700"><%= order.status_label %></p>
+      <% end %>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+      <% if order.awaiting_admin_review? %>
+        <%= button_to "✓ อนุมัติชำระเงิน", approve_admin_payment_path(order.payment), method: :post,
+            class: "rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 font-bold shadow-md transition-all hover:-translate-y-0.5 cursor-pointer",
+            data: { turbo_confirm: "ยืนยันว่าตรวจสลิปแล้ว?" } %>
+        <%= form_with url: reject_admin_payment_path(order.payment), method: :post, class: "flex gap-2" do |f| %>
+          <%= f.text_field :admin_note, placeholder: "เหตุผล", class: "rounded-xl border px-3 py-2 text-sm w-32" %>
+          <%= f.submit "ปฏิเสธ", class: "rounded-xl bg-red-500 hover:bg-red-600 text-white px-4 py-2 font-medium cursor-pointer" %>
+        <% end %>
+      <% elsif order.pending_payment? %>
+        <%= button_to "✓ ยืนยันชำระเงิน (ไม่มีสลิป)", approve_admin_payment_path(order.payment), method: :post,
+            class: "rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 font-bold shadow-md transition-all cursor-pointer",
+            data: { turbo_confirm: "ยืนยันว่าได้รับเงินแล้ว?" } %>
+      <% elsif order.paid? %>
+        <a href="#shipping-form" class="rounded-xl bg-violet-600 hover:bg-violet-700 text-white px-6 py-3 font-bold shadow-md transition-all inline-block">
+          ↓ กรอกเลขพัสดุ
+        </a>
+      <% elsif order.shipped? %>
+        <%= button_to "✓ ปิดออเดอร์ (สำเร็จ)", admin_order_path(order, mark_completed: 1), method: :patch,
+            class: "rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 font-bold shadow-md transition-all cursor-pointer" %>
+      <% end %>
+    </div>
+  </div>
+</div>

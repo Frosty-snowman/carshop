@@ -13,7 +13,12 @@ module Admin
 
     def update
       if params[:tracking_number].present?
-        @order.update!(tracking_number: params[:tracking_number], status: :shipped, shipped_at: Time.current)
+        @order.update!(
+          tracking_number: params[:tracking_number],
+          shipping_carrier: params[:shipping_carrier],
+          status: :shipped,
+          shipped_at: Time.current
+        )
         redirect_to admin_order_path(@order), notice: "บันทึกเลขพัสดุแล้ว"
       elsif params[:mark_completed].present?
         @order.update!(status: :completed)

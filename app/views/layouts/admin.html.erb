@@ -5,38 +5,58 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="bg-slate-100 min-h-screen">
-    <header class="bg-slate-900 text-white">
-      <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
-        <div class="font-bold text-lg">Carshop Admin</div>
-        <nav class="flex flex-wrap gap-4 text-sm">
-          <%= link_to "Dashboard", admin_root_path, class: "hover:underline" %>
-          <%= link_to "หมวดหมู่", admin_categories_path, class: "hover:underline" %>
-          <%= link_to "การ์ด", admin_products_path, class: "hover:underline" %>
-          <%= link_to "ออเดอร์", admin_orders_path, class: "hover:underline" %>
-          <%= link_to "ชำระเงิน", edit_admin_shop_setting_path, class: "hover:underline" %>
-          <%= link_to "กลับหน้าร้าน", root_path, class: "hover:underline" %>
-        </nav>
+  <body class="admin-shell antialiased" style="font-family: 'Kanit', sans-serif;">
+    <%# Mobile header %>
+    <header class="admin-mobile-header lg:hidden sticky top-0 z-40">
+      <div class="flex items-center justify-between px-4 py-3">
+        <%= link_to admin_root_path, class: "font-bold text-white flex items-center gap-2" do %>
+          <span class="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center text-sm">🃏</span>
+          Carshop Admin
+        <% end %>
+        <%= link_to "หน้าร้าน", root_path, class: "text-xs text-violet-300 border border-violet-500/30 px-3 py-1.5 rounded-lg" %>
       </div>
+      <nav class="flex gap-1 overflow-x-auto px-4 pb-3 text-xs">
+        <%= link_to "Dashboard", admin_root_path, class: "admin-mobile-tab #{controller_name == 'dashboard' ? 'active' : ''}" %>
+        <%= link_to "ออเดอร์", admin_orders_path, class: "admin-mobile-tab #{controller_name == 'orders' ? 'active' : ''}" %>
+        <%= link_to "การ์ด", admin_products_path, class: "admin-mobile-tab #{controller_name == 'products' ? 'active' : ''}" %>
+        <%= link_to "สต็อก", admin_stock_path, class: "admin-mobile-tab #{controller_name == 'stock' ? 'active' : ''}" %>
+        <%= link_to "หมวดหมู่", admin_categories_path, class: "admin-mobile-tab #{controller_name == 'categories' ? 'active' : ''}" %>
+        <%= link_to "QR/ชำระเงิน", edit_admin_shop_setting_path, class: "admin-mobile-tab #{controller_name == 'shop_settings' ? 'active' : ''}" %>
+      </nav>
     </header>
 
-    <% if notice.present? %>
-      <div class="max-w-6xl mx-auto px-4 mt-4">
-        <p class="rounded-lg bg-green-50 text-green-800 px-4 py-3 border border-green-200"><%= notice %></p>
+    <div class="flex min-h-screen">
+      <div class="hidden lg:flex">
+        <%= render "admin/shared/sidebar" %>
       </div>
-    <% end %>
-    <% if alert.present? %>
-      <div class="max-w-6xl mx-auto px-4 mt-4">
-        <p class="rounded-lg bg-red-50 text-red-800 px-4 py-3 border border-red-200"><%= alert %></p>
-      </div>
-    <% end %>
 
-    <main class="max-w-6xl mx-auto px-4 py-8">
-      <%= yield %>
-    </main>
+      <div class="flex-1 flex flex-col min-w-0 admin-main">
+        <% if notice.present? %>
+          <div class="px-6 pt-4 animate-fade-in">
+            <p class="admin-card text-emerald-700 px-5 py-3 border-emerald-200 bg-emerald-50 flex items-center gap-2">
+              <span>✓</span> <%= notice %>
+            </p>
+          </div>
+        <% end %>
+        <% if alert.present? %>
+          <div class="px-6 pt-4 animate-fade-in">
+            <p class="admin-card text-red-700 px-5 py-3 border-red-200 bg-red-50 flex items-center gap-2">
+              <span>!</span> <%= alert %>
+            </p>
+          </div>
+        <% end %>
+
+        <main class="flex-1 px-4 py-6 lg:px-8 lg:py-8">
+          <%= yield %>
+        </main>
+      </div>
+    </div>
   </body>
 </html>

@@ -3,7 +3,9 @@ module Admin
     before_action :set_product, only: %i[show edit update destroy]
 
     def index
+      @categories = Category.all
       @products = Product.includes(:category, :product_variants).order(created_at: :desc)
+      @products = @products.where(category_id: params[:category_id]) if params[:category_id].present?
     end
 
     def show; end

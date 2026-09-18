@@ -1,0 +1,13 @@
+pikachu_new_th:
+  product: pikachu
+  condition: 0
+  language: 0
+  price: 500.00
+  stock_quantity: 10
+
+blue_eyes_new_en:
+  product: blue_eyes
+  condition: 0
+  language: 1
+  price: 300.00
+  stock_quantity: 3

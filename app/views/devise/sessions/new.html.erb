@@ -1,26 +1,34 @@
-<h2 class="text-2xl font-bold mb-6">เข้าสู่ระบบ</h2>
+<div class="flex items-center justify-center min-h-[60vh] animate-fade-in-up">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <span class="text-4xl animate-float inline-block mb-4">🃏</span>
+      <h2 class="text-2xl font-bold">เข้าสู่ระบบ</h2>
+      <p class="text-white/40 text-sm mt-2">ยินดีต้อนรับกลับสู่ Carshop</p>
+    </div>
 
-<%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "bg-white border rounded-lg p-6 space-y-4 max-w-md" }) do |f| %>
-  <div>
-    <%= f.label :email, class: "block text-sm mb-1" %>
-    <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "w-full rounded border px-3 py-2" %>
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "glass-strong rounded-2xl p-8 space-y-5" }) do |f| %>
+      <div>
+        <%= f.label :email, class: "block text-sm mb-2 text-white/60" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "input-field", placeholder: "you@email.com" %>
+      </div>
+
+      <div>
+        <%= f.label :password, "รหัสผ่าน", class: "block text-sm mb-2 text-white/60" %>
+        <%= f.password_field :password, autocomplete: "current-password", class: "input-field", placeholder: "••••••••" %>
+      </div>
+
+      <% if devise_mapping.rememberable? %>
+        <label class="flex items-center gap-2 text-sm text-white/50 cursor-pointer">
+          <%= f.check_box :remember_me, class: "rounded accent-violet-500" %>
+          จดจำฉัน
+        </label>
+      <% end %>
+
+      <%= f.submit "เข้าสู่ระบบ", class: "btn-primary w-full !py-3" %>
+    <% end %>
+
+    <div class="mt-6 text-center text-sm text-white/40">
+      <%= render "devise/shared/links" %>
+    </div>
   </div>
-
-  <div>
-    <%= f.label :password, "รหัสผ่าน", class: "block text-sm mb-1" %>
-    <%= f.password_field :password, autocomplete: "current-password", class: "w-full rounded border px-3 py-2" %>
-  </div>
-
-  <% if devise_mapping.rememberable? %>
-    <label class="flex items-center gap-2 text-sm">
-      <%= f.check_box :remember_me %>
-      <%= f.label :remember_me, "จดจำฉัน" %>
-    </label>
-  <% end %>
-
-  <%= f.submit "เข้าสู่ระบบ", class: "rounded-lg bg-slate-900 text-white px-6 py-2 cursor-pointer" %>
-<% end %>
-
-<div class="mt-4">
-  <%= render "devise/shared/links" %>
 </div>

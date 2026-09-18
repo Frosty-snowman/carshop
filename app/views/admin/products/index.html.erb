@@ -1,28 +1,46 @@
-<div class="flex justify-between items-center mb-6">
-  <h1 class="text-2xl font-bold">การ์ดทั้งหมด</h1>
-  <%= link_to "เพิ่มการ์ด", new_admin_product_path, class: "rounded-lg bg-slate-900 text-white px-4 py-2" %>
+<div class="flex justify-between items-center mb-6 animate-fade-in-up">
+  <div>
+    <h1 class="text-2xl font-bold text-slate-800">การ์ดทั้งหมด</h1>
+    <p class="text-slate-500 text-sm mt-1">จัดการสินค้าและสต็อก</p>
+  </div>
+  <%= link_to "＋ เพิ่มการ์ด", new_admin_product_path, class: "rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-5 py-2.5 font-medium shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300" %>
 </div>
 
-<div class="bg-white border rounded-lg overflow-hidden">
+<div class="flex flex-wrap gap-2 mb-6 animate-fade-in-up" style="animation-delay: 0.1s">
+  <%= link_to "ทั้งหมด", admin_products_path,
+      class: "rounded-full px-4 py-1.5 text-sm transition-all duration-200 #{params[:category_id].blank? ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-400'}" %>
+  <% @categories.each do |category| %>
+    <% style = category_style(category) %>
+    <%= link_to admin_products_path(category_id: category.id),
+        class: "rounded-full px-4 py-1.5 text-sm transition-all duration-200 #{params[:category_id].to_i == category.id ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-400'}" do %>
+      <%= style[:emoji] %> <%= category.name %>
+    <% end %>
+  <% end %>
+</div>
+
+<div class="admin-card overflow-hidden animate-fade-in-up" style="animation-delay: 0.15s">
   <table class="w-full text-sm">
-    <thead class="bg-slate-50 text-left">
+    <thead class="bg-slate-50 text-left text-slate-500">
       <tr>
-        <th class="p-3">ชื่อ</th>
-        <th class="p-3">หมวดหมู่</th>
-        <th class="p-3">Variants</th>
-        <th class="p-3">สต็อกรวม</th>
-        <th class="p-3"></th>
+        <th class="p-4 font-medium">ชื่อ</th>
+        <th class="p-4 font-medium">หมวดหมู่</th>
+        <th class="p-4 font-medium">Variants</th>
+        <th class="p-4 font-medium">สต็อกรวม</th>
+        <th class="p-4"></th>
       </tr>
     </thead>
     <tbody>
       <% @products.each do |product| %>
-        <tr class="border-t">
-          <td class="p-3 font-medium"><%= product.name %></td>
-          <td class="p-3"><%= product.category.name %></td>
-          <td class="p-3"><%= product.product_variants.count %></td>
-          <td class="p-3"><%= product.product_variants.sum(:stock_quantity) %></td>
-          <td class="p-3 text-right">
-            <%= link_to "จัดการ", admin_product_path(product), class: "text-indigo-600" %>
+        <tr class="border-t border-slate-100 hover:bg-slate-50/80 transition-colors">
+          <td class="p-4 font-medium text-slate-800"><%= product.name %></td>
+          <td class="p-4 text-slate-500"><%= product.category.name %></td>
+          <td class="p-4 text-slate-500"><%= product.product_variants.count %></td>
+          <td class="p-4">
+            <% total = product.product_variants.sum(:stock_quantity) %>
+            <span class="<%= total <= 3 ? 'text-red-500 font-medium' : 'text-slate-600' %>"><%= total %></span>
+          </td>
+          <td class="p-4 text-right">
+            <%= link_to "จัดการ →", admin_product_path(product), class: "text-violet-600 hover:text-violet-800 font-medium transition-colors" %>
           </td>
         </tr>
       <% end %>

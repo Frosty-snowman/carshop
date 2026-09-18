@@ -1,0 +1,5 @@
+default:
+  bank_name: Test Bank
+  account_number: "000-0-00000-0"
+  account_name: Test Shop
+  payment_instructions: Test instructions

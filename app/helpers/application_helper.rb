@@ -3,6 +3,16 @@ module ApplicationHelper
     number_to_currency(amount, unit: "฿", precision: 2, format: "%u%n")
   end
 
+  CATEGORY_STYLES = {
+    "Pokemon" => { emoji: "⚡", gradient: "from-yellow-500/20 to-amber-600/20", border: "border-yellow-500/30", text: "text-yellow-400" },
+    "Yu-Gi-Oh!" => { emoji: "🐉", gradient: "from-blue-500/20 to-indigo-600/20", border: "border-blue-500/30", text: "text-blue-400" },
+    "One Piece" => { emoji: "🏴‍☠️", gradient: "from-red-500/20 to-orange-600/20", border: "border-red-500/30", text: "text-red-400" }
+  }.freeze
+
+  def category_style(category)
+    CATEGORY_STYLES.fetch(category.name, { emoji: "🃏", gradient: "from-violet-500/20 to-purple-600/20", border: "border-violet-500/30", text: "text-violet-400" })
+  end
+
   def order_status_badge_class(status)
     {
       "pending_payment" => "bg-yellow-100 text-yellow-800",

@@ -1,34 +1,42 @@
-<h2 class="text-2xl font-bold mb-6">สมัครสมาชิก</h2>
+<div class="flex items-center justify-center min-h-[60vh] animate-fade-in-up">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <span class="text-4xl animate-float inline-block mb-4">✨</span>
+      <h2 class="text-2xl font-bold">สมัครสมาชิก</h2>
+      <p class="text-white/40 text-sm mt-2">เริ่มสะสมการ์ดกับเราวันนี้</p>
+    </div>
 
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "bg-white border rounded-lg p-6 space-y-4 max-w-md" }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "glass-strong rounded-2xl p-8 space-y-5" }) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
 
-  <div>
-    <%= f.label :name, "ชื่อ-นามสกุล", class: "block text-sm mb-1" %>
-    <%= f.text_field :name, autofocus: true, class: "w-full rounded border px-3 py-2" %>
-  </div>
+      <div>
+        <%= f.label :name, "ชื่อ-นามสกุล", class: "block text-sm mb-2 text-white/60" %>
+        <%= f.text_field :name, autofocus: true, class: "input-field", placeholder: "ชื่อของคุณ" %>
+      </div>
 
-  <div>
-    <%= f.label :email, class: "block text-sm mb-1" %>
-    <%= f.email_field :email, autocomplete: "email", class: "w-full rounded border px-3 py-2" %>
-  </div>
+      <div>
+        <%= f.label :email, class: "block text-sm mb-2 text-white/60" %>
+        <%= f.email_field :email, autocomplete: "email", class: "input-field", placeholder: "you@email.com" %>
+      </div>
 
-  <div>
-    <%= f.label :password, class: "block text-sm mb-1" %>
-    <% if @minimum_password_length %>
-      <p class="text-xs text-slate-500 mb-1">อย่างน้อย <%= @minimum_password_length %> ตัวอักษร</p>
+      <div>
+        <%= f.label :password, class: "block text-sm mb-2 text-white/60" %>
+        <% if @minimum_password_length %>
+          <p class="text-xs text-white/30 mb-1">อย่างน้อย <%= @minimum_password_length %> ตัวอักษร</p>
+        <% end %>
+        <%= f.password_field :password, autocomplete: "new-password", class: "input-field" %>
+      </div>
+
+      <div>
+        <%= f.label :password_confirmation, "ยืนยันรหัสผ่าน", class: "block text-sm mb-2 text-white/60" %>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "input-field" %>
+      </div>
+
+      <%= f.submit "สมัครสมาชิก", class: "btn-primary w-full !py-3" %>
     <% end %>
-    <%= f.password_field :password, autocomplete: "new-password", class: "w-full rounded border px-3 py-2" %>
+
+    <div class="mt-6 text-center text-sm text-white/40">
+      <%= render "devise/shared/links" %>
+    </div>
   </div>
-
-  <div>
-    <%= f.label :password_confirmation, "ยืนยันรหัสผ่าน", class: "block text-sm mb-1" %>
-    <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "w-full rounded border px-3 py-2" %>
-  </div>
-
-  <%= f.submit "สมัครสมาชิก", class: "rounded-lg bg-slate-900 text-white px-6 py-2 cursor-pointer" %>
-<% end %>
-
-<div class="mt-4">
-  <%= render "devise/shared/links" %>
 </div>

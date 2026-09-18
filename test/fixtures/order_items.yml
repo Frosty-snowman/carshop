@@ -1,0 +1,17 @@
+paid_item:
+  order: paid_order
+  product_variant: pikachu_new_th
+  quantity: 1
+  unit_price: 500.00
+
+shipped_item:
+  order: shipped_order
+  product_variant: blue_eyes_new_en
+  quantity: 1
+  unit_price: 300.00
+
+submitted_item:
+  order: submitted_order
+  product_variant: pikachu_new_th
+  quantity: 1
+  unit_price: 500.00

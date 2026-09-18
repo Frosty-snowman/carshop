@@ -1,41 +1,161 @@
-<h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+<% content_for :title, "Dashboard - Carshop Admin" %>
 
-<div class="grid md:grid-cols-2 gap-6 mb-8">
-  <div class="bg-white border rounded-lg p-6">
-    <h2 class="font-semibold mb-4">รอตรวจสอบสลิป (<%= @pending_payments.count %>)</h2>
-    <% @pending_payments.each do |payment| %>
-      <div class="py-3 border-b last:border-0">
-        <%= link_to admin_order_path(payment.order), class: "font-medium text-indigo-600" do %>
-          ออเดอร์ #<%= payment.order.id %> — <%= payment.order.user.name %>
-        <% end %>
-        <p class="text-sm text-slate-500"><%= format_baht(payment.order.total_amount) %></p>
-      </div>
-    <% end %>
-    <% if @pending_payments.empty? %>
-      <p class="text-slate-500 text-sm">ไม่มีรายการรอตรวจสอบ</p>
-    <% end %>
+<div class="animate-fade-in-up mb-8">
+  <h1 class="text-2xl lg:text-3xl font-bold text-slate-800">สวัสดี, <%= current_user.name %> 👋</h1>
+  <p class="text-slate-500 mt-1">ภาพรวมร้าน · <%= l(Date.current, format: :long) %></p>
+</div>
+
+<%# ── Stats ── %>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-fade-in-up" style="animation-delay: 0.05s">
+  <div class="admin-stat-card">
+    <p class="admin-stat-label">ยอดขายเดือนนี้</p>
+    <p class="admin-stat-value text-violet-600"><%= format_baht(@sales.total_revenue) %></p>
+  </div>
+  <div class="admin-stat-card">
+    <p class="admin-stat-label">ออเดอร์เดือนนี้</p>
+    <p class="admin-stat-value text-slate-800"><%= @sales.order_count %></p>
+  </div>
+  <div class="admin-stat-card">
+    <p class="admin-stat-label">ลูกค้า (เดือนนี้)</p>
+    <p class="admin-stat-value text-slate-800"><%= @sales.unique_customers %></p>
+  </div>
+  <div class="admin-stat-card <%= @sales.pending_slip_count + @sales.awaiting_shipment_count > 0 ? 'ring-2 ring-amber-300' : '' %>">
+    <p class="admin-stat-label">รอดำเนินการ</p>
+    <p class="admin-stat-value text-amber-600"><%= @sales.pending_slip_count + @sales.awaiting_shipment_count %></p>
+    <p class="text-xs text-slate-400 mt-1">สลิป <%= @sales.pending_slip_count %> · จัดส่ง <%= @sales.awaiting_shipment_count %></p>
+  </div>
+</div>
+
+<%# ── Chart + Categories ── %>
+<div class="grid lg:grid-cols-3 gap-6 mb-8">
+  <div class="lg:col-span-2 admin-card p-6 animate-fade-in-up" style="animation-delay: 0.1s">
+    <h2 class="font-semibold text-slate-800 mb-6">ยอดขาย 7 วันล่าสุด</h2>
+    <div class="flex items-end gap-2 h-40">
+      <% @daily_revenue.each do |day| %>
+        <% height = (day[:amount].to_f / @max_daily * 100).round %>
+        <div class="flex-1 flex flex-col items-center gap-2">
+          <span class="text-xs text-slate-500 font-medium"><%= day[:amount].to_i > 0 ? format_baht(day[:amount]) : "" %></span>
+          <div class="w-full rounded-t-lg bg-gradient-to-t from-violet-600 to-violet-400 transition-all duration-700 min-h-[4px]"
+               style="height: <%= [height, 4].max %>%"></div>
+          <span class="text-[10px] text-slate-400"><%= day[:label] %></span>
+        </div>
+      <% end %>
+    </div>
   </div>
 
-  <div class="bg-white border rounded-lg p-6">
-    <h2 class="font-semibold mb-4">สต็อกใกล้หมด</h2>
-    <% @low_stock_variants.each do |variant| %>
-      <div class="py-2 border-b last:border-0 text-sm">
-        <p class="font-medium"><%= variant.product.name %> — <%= variant.display_label %></p>
-        <p class="text-red-600">เหลือ <%= variant.stock_quantity %> ใบ</p>
-      </div>
-    <% end %>
-    <% if @low_stock_variants.empty? %>
-      <p class="text-slate-500 text-sm">สต็อกปกติ</p>
+  <div class="admin-card p-6 animate-fade-in-up" style="animation-delay: 0.12s">
+    <h2 class="font-semibold text-slate-800 mb-4">ยอดขายตามหมวด</h2>
+    <% categories = @sales.revenue_by_category.sort_by { |_, v| -v } %>
+    <% if categories.any? %>
+      <% max_cat = categories.first.last.to_f %>
+      <% categories.each do |name, amount| %>
+        <% pct = max_cat.positive? ? (amount.to_f / max_cat * 100).round : 0 %>
+        <div class="mb-4">
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-slate-600"><%= name %></span>
+            <span class="font-medium text-slate-800"><%= format_baht(amount) %></span>
+          </div>
+          <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div class="h-full bg-violet-500 rounded-full transition-all duration-700" style="width: <%= pct %>%"></div>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="text-slate-400 text-sm">ยังไม่มียอดขาย</p>
     <% end %>
   </div>
 </div>
 
-<div class="bg-white border rounded-lg p-6">
-  <h2 class="font-semibold mb-4">ออเดอร์ชำระแล้ว รอจัดส่ง</h2>
-  <% @paid_orders.each do |order| %>
-    <div class="py-3 border-b last:border-0 flex justify-between">
-      <%= link_to "ออเดอร์ ##{order.id}", admin_order_path(order), class: "text-indigo-600" %>
-      <span><%= order.user.name %></span>
+<%# ── Top products + Recent orders ── %>
+<div class="grid lg:grid-cols-2 gap-6 mb-8">
+  <div class="admin-card p-6 animate-fade-in-up" style="animation-delay: 0.15s">
+    <h2 class="font-semibold text-slate-800 mb-4">🎴 การ์ดขายดี</h2>
+    <% if @sales.top_products.any? %>
+      <ol class="space-y-3">
+        <% @sales.top_products.each_with_index do |(name, qty), i| %>
+          <li class="flex items-center gap-3">
+            <span class="w-7 h-7 rounded-full bg-violet-100 text-violet-700 flex items-center justify-center text-xs font-bold shrink-0"><%= i + 1 %></span>
+            <span class="flex-1 text-slate-700 truncate"><%= name %></span>
+            <span class="text-sm font-medium text-slate-500"><%= qty %> ใบ</span>
+          </li>
+        <% end %>
+      </ol>
+    <% else %>
+      <p class="text-slate-400 text-sm">ยังไม่มีข้อมูล</p>
+    <% end %>
+  </div>
+
+  <div class="admin-card p-6 animate-fade-in-up" style="animation-delay: 0.17s">
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="font-semibold text-slate-800">ออเดอร์ล่าสุด</h2>
+      <%= link_to "ดูทั้งหมด", admin_orders_path, class: "text-sm text-violet-600 hover:text-violet-800" %>
     </div>
-  <% end %>
+    <% @sales.recent_orders.each do |order| %>
+      <div class="flex justify-between items-center py-2.5 border-b border-slate-50 last:border-0">
+        <%= link_to admin_order_path(order), class: "font-medium text-violet-600 hover:text-violet-800" do %>
+          #<%= order.id %> · <%= order.user.name %>
+        <% end %>
+        <div class="text-right">
+          <p class="text-sm font-medium text-slate-800"><%= format_baht(order.total_amount) %></p>
+          <span class="text-[10px] rounded-full px-2 py-0.5 <%= order_status_badge_class(order.status) %>"><%= order.status_label %></span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%# ── ต้องดำเนินการ ── %>
+<h2 class="text-lg font-bold text-slate-800 mb-4 animate-fade-in-up" style="animation-delay: 0.2s">⚡ ต้องดำเนินการ</h2>
+
+<% if @pending_payments.any? %>
+  <div class="admin-card p-6 mb-6 border-2 border-amber-300 bg-amber-50/50 animate-fade-in-up">
+    <h3 class="font-bold text-amber-900 mb-4">รอตรวจสอบสลิป (<%= @pending_payments.count %>)</h3>
+    <% @pending_payments.each do |payment| %>
+      <div class="flex flex-wrap items-center justify-between gap-3 py-3 border-b border-amber-200/60 last:border-0">
+        <div>
+          <%= link_to admin_order_path(payment.order), class: "font-bold text-violet-700 hover:text-violet-900" do %>
+            ออเดอร์ #<%= payment.order.id %> — <%= payment.order.user.name %>
+          <% end %>
+          <p class="text-sm text-amber-800/70"><%= format_baht(payment.order.total_amount) %></p>
+        </div>
+        <div class="flex gap-2">
+          <%= button_to "✓ อนุมัติ", approve_admin_payment_path(payment), method: :post,
+              class: "rounded-xl bg-emerald-600 text-white px-4 py-2 font-bold text-sm cursor-pointer",
+              data: { turbo_confirm: "ยืนยัน?" } %>
+          <%= link_to "ดูสลิป", admin_order_path(payment.order), class: "rounded-xl border border-amber-300 bg-white px-4 py-2 text-sm font-medium" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="grid md:grid-cols-2 gap-6 animate-fade-in-up" style="animation-delay: 0.22s">
+  <div class="admin-card p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-semibold text-slate-800">🚚 รอจัดส่ง (<%= @paid_orders.count %>)</h3>
+      <%= link_to "ดูทั้งหมด", admin_orders_path(status: :paid), class: "text-sm text-violet-600" %>
+    </div>
+    <% @paid_orders.each do |order| %>
+      <div class="flex justify-between items-center py-2 border-b border-slate-50 last:border-0">
+        <%= link_to "ออเดอร์ ##{order.id}", admin_order_path(order), class: "text-violet-600 font-medium text-sm" %>
+        <%= link_to "กรอกเลขพัสดุ →", admin_order_path(order, anchor: "shipping-form"),
+            class: "text-xs font-bold text-violet-700 bg-violet-100 px-3 py-1 rounded-full" %>
+      </div>
+    <% end %>
+    <% if @paid_orders.empty? %><p class="text-slate-400 text-sm">ไม่มีรายการ</p><% end %>
+  </div>
+
+  <div class="admin-card p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-semibold text-slate-800">📦 สต็อกใกล้หมด</h3>
+      <%= link_to "เติมสต็อก", admin_stock_path, class: "text-sm text-violet-600" %>
+    </div>
+    <% @low_stock_variants.each do |variant| %>
+      <div class="py-2 border-b border-slate-50 last:border-0 text-sm">
+        <%= link_to variant.product.name, admin_product_path(variant.product), class: "text-slate-700 hover:text-violet-600" %>
+        <span class="text-red-500 font-medium"> · เหลือ <%= variant.stock_quantity %></span>
+      </div>
+    <% end %>
+    <% if @low_stock_variants.empty? %><p class="text-slate-400 text-sm">สต็อกปกติ ✓</p><% end %>
+  </div>
 </div>

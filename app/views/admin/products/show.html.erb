@@ -29,6 +29,7 @@
             <th class="p-3">ภาษา</th>
             <th class="p-3">ราคา</th>
             <th class="p-3">สต็อก</th>
+            <th class="p-3">เติมสต็อก</th>
             <th class="p-3"></th>
           </tr>
         </thead>
@@ -38,7 +39,17 @@
               <td class="p-3"><%= variant.condition_label %></td>
               <td class="p-3"><%= variant.language_label %></td>
               <td class="p-3"><%= format_baht(variant.price) %></td>
-              <td class="p-3"><%= variant.stock_quantity %></td>
+              <td class="p-3">
+                <span class="<%= variant.stock_quantity <= 3 ? 'text-red-600 font-medium' : '' %>">
+                  <%= variant.stock_quantity %>
+                </span>
+              </td>
+              <td class="p-3">
+                <%= form_with url: replenish_admin_product_product_variant_path(@product, variant), method: :post, class: "flex items-center gap-2" do %>
+                  <%= number_field_tag :amount, nil, min: 1, placeholder: "+N", class: "w-20 rounded border px-2 py-1" %>
+                  <%= submit_tag "เติม", class: "rounded bg-emerald-600 text-white px-3 py-1 cursor-pointer text-xs" %>
+                <% end %>
+              </td>
               <td class="p-3 text-right space-x-2">
                 <%= link_to "แก้ไข", edit_admin_product_product_variant_path(@product, variant), class: "text-indigo-600" %>
                 <%= button_to "ลบ", admin_product_product_variant_path(@product, variant), method: :delete, form: { data: { turbo_confirm: "ลบ variant นี้?" } }, class: "text-red-600 inline" %>

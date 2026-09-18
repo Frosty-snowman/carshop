@@ -33,6 +33,9 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+# Private notes with passwords — do not commit
+/README.md
+
 
 /app/assets/builds/*
 !/app/assets/builds/.keep

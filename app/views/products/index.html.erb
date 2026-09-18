@@ -1,14 +1,30 @@
-<h1 class="text-2xl font-bold mb-6">การ์ดทั้งหมด</h1>
+<div class="animate-fade-in-up mb-8">
+  <h1 class="text-3xl font-bold mb-2">การ์ดทั้งหมด</h1>
+  <p class="text-white/40">เลือกการ์ดที่ต้องการจากหมวดหมู่ด้านล่าง</p>
+</div>
 
-<div class="flex flex-wrap gap-3 mb-8">
-  <%= link_to "ทั้งหมด", products_path, class: "rounded-full px-4 py-2 #{params[:category_id].blank? ? 'bg-slate-900 text-white' : 'bg-white border'}" %>
+<div class="flex flex-wrap gap-2 mb-10 animate-fade-in-up" style="animation-delay: 0.1s">
+  <%= link_to "ทั้งหมด", products_path,
+      class: "category-pill #{params[:category_id].blank? ? 'category-pill-active' : ''}" %>
   <% @categories.each do |category| %>
-    <%= link_to category.name, products_path(category_id: category.id), class: "rounded-full px-4 py-2 #{params[:category_id].to_s == category.id.to_s ? 'bg-slate-900 text-white' : 'bg-white border'}" %>
+    <% style = category_style(category) %>
+    <%= link_to products_path(category_id: category.id),
+        class: "category-pill #{params[:category_id].to_s == category.id.to_s ? 'category-pill-active' : ''}" do %>
+      <%= style[:emoji] %> <%= category.name %>
+    <% end %>
   <% end %>
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-  <% @products.each do |product| %>
-    <%= render "products/card", product: product %>
+  <% @products.each_with_index do |product, i| %>
+    <%= render "products/card", product: product, index: i %>
   <% end %>
 </div>
+
+<% if @products.empty? %>
+  <div class="glass rounded-2xl p-12 text-center animate-fade-in">
+    <span class="text-4xl mb-4 block opacity-30">🔍</span>
+    <p class="text-white/40">ไม่พบการ์ดในหมวดหมู่นี้</p>
+    <%= link_to "ดูทั้งหมด", products_path, class: "btn-secondary mt-4 inline-flex" %>
+  </div>
+<% end %>

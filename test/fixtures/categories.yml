@@ -1,0 +1,9 @@
+pokemon:
+  name: Pokemon
+  description: Pokemon TCG
+  position: 1
+
+yugioh:
+  name: Yu-Gi-Oh!
+  description: Yu-Gi-Oh! cards
+  position: 2

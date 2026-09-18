@@ -1,28 +1,94 @@
-<h1 class="text-2xl font-bold mb-6">ตั้งค่าการชำระเงิน</h1>
+<% content_for :title, "ตั้งค่าชำระเงิน - Carshop Admin" %>
 
-<%= form_with model: [:admin, @shop_setting], html: { multipart: true }, class: "bg-white border rounded-lg p-6 space-y-4 max-w-xl" do |f| %>
-  <div>
-    <%= f.label :bank_name, "ธนาคาร", class: "block text-sm mb-1" %>
-    <%= f.text_field :bank_name, class: "w-full rounded border px-3 py-2" %>
+<div class="mb-8 animate-fade-in-up">
+  <h1 class="text-2xl lg:text-3xl font-bold text-slate-800">ตั้งค่าชำระเงิน</h1>
+  <p class="text-slate-500 mt-1">บัญชีธนาคารและ QR Code ที่ลูกค้าเห็นตอน checkout</p>
+</div>
+
+<%= form_with model: [:admin, @shop_setting], html: { multipart: true }, class: "animate-fade-in-up" do |f| %>
+  <% if @shop_setting.errors.any? %>
+    <div class="admin-card p-4 mb-6 border-red-200 bg-red-50 text-red-700 text-sm">
+      <%= @shop_setting.errors.full_messages.to_sentence %>
+    </div>
+  <% end %>
+
+  <div class="grid lg:grid-cols-2 gap-6">
+    <%# บัญชีธนาคาร %>
+    <div class="admin-card p-6 space-y-5">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-lg">🏦</span>
+        <h2 class="font-semibold text-slate-800 text-lg">บัญชีธนาคาร</h2>
+      </div>
+
+      <div>
+        <%= f.label :bank_name, "ธนาคาร", class: "block text-sm font-medium text-slate-600 mb-1.5" %>
+        <%= f.text_field :bank_name, class: "admin-input", placeholder: "เช่น ธนาคารกสิกรไทย" %>
+      </div>
+      <div>
+        <%= f.label :account_number, "เลขบัญชี", class: "block text-sm font-medium text-slate-600 mb-1.5" %>
+        <%= f.text_field :account_number, class: "admin-input font-mono", placeholder: "123-4-56789-0" %>
+      </div>
+      <div>
+        <%= f.label :account_name, "ชื่อบัญชี", class: "block text-sm font-medium text-slate-600 mb-1.5" %>
+        <%= f.text_field :account_name, class: "admin-input", placeholder: "ชื่อบัญชีผู้รับเงิน" %>
+      </div>
+      <div>
+        <%= f.label :payment_instructions, "คำแนะนำเพิ่มเติม", class: "block text-sm font-medium text-slate-600 mb-1.5" %>
+        <%= f.text_area :payment_instructions, rows: 4, class: "admin-input",
+            placeholder: "เช่น โอนเงินแล้วแนบสลิปในหน้าออเดอร์..." %>
+      </div>
+    </div>
+
+    <%# QR Code %>
+    <div class="admin-card p-6 space-y-5">
+      <div class="flex items-center gap-3 mb-2">
+        <span class="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-lg">📱</span>
+        <div>
+          <h2 class="font-semibold text-slate-800 text-lg">QR Code ชำระเงิน</h2>
+          <p class="text-xs text-slate-400">PromptPay / QR ธนาคาร</p>
+        </div>
+      </div>
+
+      <div class="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-6 text-center">
+        <% if @shop_setting.qr_code.attached? %>
+          <div class="mb-4">
+            <%= image_tag @shop_setting.qr_code, class: "mx-auto max-w-[220px] rounded-xl border border-slate-200 shadow-sm" %>
+          </div>
+          <p class="text-sm text-emerald-600 font-medium mb-3">✓ มี QR Code แล้ว</p>
+          <% if @shop_setting.qr_code.blob %>
+            <p class="text-xs text-slate-400 mb-4"><%= @shop_setting.qr_code.filename %></p>
+          <% end %>
+        <% else %>
+          <div class="py-8 mb-4">
+            <span class="text-5xl opacity-30">📷</span>
+            <p class="text-slate-400 text-sm mt-3">ยังไม่ได้อัปโหลด QR Code</p>
+          </div>
+        <% end %>
+
+        <%= f.label :qr_code, class: "cursor-pointer inline-flex items-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 font-medium transition-colors shadow-md" do %>
+          <span><%= @shop_setting.qr_code.attached? ? "เปลี่ยน QR Code" : "อัปโหลด QR Code" %></span>
+          <%= f.file_field :qr_code, accept: "image/jpeg,image/png,image/webp", class: "sr-only" %>
+        <% end %>
+        <p class="text-xs text-slate-400 mt-3">รองรับ JPG, PNG, WEBP</p>
+      </div>
+
+      <%# Preview ว่าลูกค้าเห็นยังไง %>
+      <div class="rounded-xl bg-slate-900 p-4 text-white text-sm">
+        <p class="text-xs text-slate-400 uppercase tracking-wide mb-2">ลูกค้าเห็นแบบนี้</p>
+        <p><span class="text-slate-400">ธนาคาร:</span> <%= @shop_setting.bank_name.presence || "—" %></p>
+        <p><span class="text-slate-400">เลขบัญชี:</span> <span class="font-mono"><%= @shop_setting.account_number.presence || "—" %></span></p>
+        <p><span class="text-slate-400">ชื่อบัญชี:</span> <%= @shop_setting.account_name.presence || "—" %></p>
+        <% if @shop_setting.qr_code.attached? %>
+          <p class="text-violet-400 mt-2 text-xs">+ QR Code แสดงในหน้า checkout / ออเดอร์</p>
+        <% else %>
+          <p class="text-amber-400 mt-2 text-xs">⚠ ยังไม่มี QR — ลูกค้าเห็นแค่เลขบัญชี</p>
+        <% end %>
+      </div>
+    </div>
   </div>
-  <div>
-    <%= f.label :account_number, "เลขบัญชี", class: "block text-sm mb-1" %>
-    <%= f.text_field :account_number, class: "w-full rounded border px-3 py-2" %>
+
+  <div class="mt-6 flex gap-3">
+    <%= f.submit "บันทึกการตั้งค่า", class: "rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 font-medium cursor-pointer shadow-md transition-all hover:-translate-y-0.5" %>
+    <%= link_to "ยกเลิก", admin_root_path, class: "rounded-xl border border-slate-200 text-slate-600 px-6 py-3 font-medium hover:bg-slate-50 transition-colors" %>
   </div>
-  <div>
-    <%= f.label :account_name, "ชื่อบัญชี", class: "block text-sm mb-1" %>
-    <%= f.text_field :account_name, class: "w-full rounded border px-3 py-2" %>
-  </div>
-  <div>
-    <%= f.label :qr_code, "QR Code สำหรับชำระเงิน", class: "block text-sm mb-1" %>
-    <%= f.file_field :qr_code, accept: "image/*", class: "block" %>
-    <% if @shop_setting.qr_code.attached? %>
-      <div class="mt-2"><%= image_tag @shop_setting.qr_code, class: "max-w-xs rounded border" %></div>
-    <% end %>
-  </div>
-  <div>
-    <%= f.label :payment_instructions, "คำแนะนำเพิ่มเติม", class: "block text-sm mb-1" %>
-    <%= f.text_area :payment_instructions, rows: 4, class: "w-full rounded border px-3 py-2" %>
-  </div>
-  <%= f.submit "บันทึก", class: "rounded-lg bg-slate-900 text-white px-6 py-2 cursor-pointer" %>
 <% end %>

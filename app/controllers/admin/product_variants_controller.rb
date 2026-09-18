@@ -1,7 +1,7 @@
 module Admin
   class ProductVariantsController < BaseController
     before_action :set_product
-    before_action :set_variant, only: %i[edit update destroy]
+    before_action :set_variant, only: %i[edit update destroy replenish]
 
     def new
       @variant = @product.product_variants.build
@@ -29,6 +29,13 @@ module Admin
     def destroy
       @variant.destroy
       redirect_to admin_product_path(@product), notice: "ลบ variant แล้ว"
+    end
+
+    def replenish
+      @variant.replenish!(params[:amount])
+      redirect_to admin_product_path(@product), notice: "เติมสต็อก #{params[:amount]} ใบแล้ว (รวม #{@variant.stock_quantity} ใบ)"
+    rescue ArgumentError
+      redirect_to admin_product_path(@product), alert: "จำนวนต้องมากกว่า 0"
     end
 
     private

@@ -15,8 +15,14 @@ Rails.application.routes.draw do
     root "dashboard#show"
     resource :shop_setting, only: %i[edit update]
     resources :categories, except: %i[show]
+    get "stock", to: "stock#index", as: :stock
+    patch "stock", to: "stock#update"
     resources :products do
-      resources :product_variants, except: %i[index show]
+      resources :product_variants, except: %i[index show] do
+        member do
+          post :replenish
+        end
+      end
     end
     resources :orders, only: %i[index show update]
     resources :payments, only: [] do

@@ -14,6 +14,13 @@ class ProductVariant < ApplicationRecord
     stock_quantity.positive?
   end
 
+  def replenish!(amount)
+    amount = amount.to_i
+    raise ArgumentError, "amount must be positive" if amount <= 0
+
+    increment!(:stock_quantity, amount)
+  end
+
   def display_label
     "#{condition_label} / #{language_label}"
   end

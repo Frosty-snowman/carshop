@@ -1,0 +1,14 @@
+paid_payment:
+  order: paid_order
+  method: 0
+  status: 1
+
+shipped_payment:
+  order: shipped_order
+  method: 0
+  status: 1
+
+submitted_payment:
+  order: submitted_order
+  method: 0
+  status: 0

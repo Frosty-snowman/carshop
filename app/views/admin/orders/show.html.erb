@@ -1,82 +1,121 @@
-<%= link_to "← ออเดอร์ทั้งหมด", admin_orders_path, class: "text-sm text-slate-600 mb-4 inline-block" %>
+<%= link_to "← ออเดอร์ทั้งหมด", admin_orders_path, class: "text-sm text-slate-500 hover:text-slate-700 mb-4 inline-block transition-colors" %>
 
-<div class="bg-white border rounded-lg p-6 mb-6">
-  <div class="flex flex-wrap justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-bold">ออเดอร์ #<%= @order.id %></h1>
-      <p class="text-slate-600"><%= @order.user.name %> (<%= @order.user.email %>)</p>
-    </div>
-    <span class="rounded-full px-3 py-1 text-sm h-fit <%= order_status_badge_class(@order.status) %>"><%= @order.status_label %></span>
-  </div>
+<%= render "admin/orders/action_banner", order: @order %>
 
-  <div class="grid md:grid-cols-2 gap-6 mt-6">
-    <div>
-      <h2 class="font-semibold mb-2">ที่อยู่จัดส่ง</h2>
-      <p><%= @order.recipient_name %></p>
-      <p><%= @order.phone %></p>
-      <p class="whitespace-pre-line text-slate-600"><%= @order.address %></p>
-    </div>
-    <div>
-      <h2 class="font-semibold mb-2">รายการ</h2>
-      <% @order.order_items.each do |item| %>
-        <div class="flex justify-between text-sm py-1">
-          <span><%= item.product_variant.product.name %> (<%= item.product_variant.display_label %>) × <%= item.quantity %></span>
-          <span><%= format_baht(item.subtotal) %></span>
+<div class="grid lg:grid-cols-5 gap-6">
+  <div class="lg:col-span-3 space-y-6">
+    <div class="admin-card p-6 animate-fade-in-up">
+      <div class="flex flex-wrap justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-800">ออเดอร์ #<%= @order.id %></h1>
+          <p class="text-slate-500"><%= @order.user.name %> (<%= @order.user.email %>)</p>
         </div>
-      <% end %>
-      <div class="flex justify-between font-bold mt-3 pt-3 border-t">
-        <span>รวม</span>
-        <span><%= format_baht(@order.total_amount) %></span>
+        <span class="rounded-full px-3 py-1 text-sm h-fit <%= order_status_badge_class(@order.status) %>">
+          <%= @order.status_label %>
+        </span>
+      </div>
+
+      <div class="mt-8 p-4 bg-slate-50 rounded-xl border border-slate-100">
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wide mb-4">Preview — ลูกค้าเห็นแบบนี้</p>
+        <div class="bg-[#0b0f1a] rounded-xl p-6 text-white">
+          <%= render "shared/order_timeline", order: @order %>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<% if @order.payment.present? %>
-  <div class="bg-white border rounded-lg p-6 mb-6">
-    <h2 class="font-semibold mb-4">การชำระเงิน — <%= @order.payment.method_label %></h2>
-    <p class="text-sm mb-4">สถานะ: <%= @order.payment.status_label %></p>
+    <% if @order.payment.present? %>
+      <div class="admin-card p-6 animate-fade-in-up" style="animation-delay: 0.1s">
+        <h2 class="font-semibold mb-4 text-slate-800">การชำระเงิน — <%= @order.payment.method_label %></h2>
+        <p class="text-sm mb-4 text-slate-500">สถานะ: <%= @order.payment.status_label %></p>
 
-    <% if @order.payment.slip.attached? %>
-      <% if @order.payment.slip.content_type.start_with?("image/") %>
-        <%= image_tag @order.payment.slip, class: "max-w-md rounded border mb-4" %>
-      <% else %>
-        <%= link_to "ดาวน์โหลดสลิป", rails_blob_path(@order.payment.slip, disposition: "attachment"), class: "text-indigo-600 block mb-4" %>
-      <% end %>
-    <% end %>
+        <% if @order.payment.slip.attached? %>
+          <% if @order.payment.slip.content_type.start_with?("image/") %>
+            <%= image_tag @order.payment.slip, class: "max-w-md rounded-xl border mb-4" %>
+          <% else %>
+            <%= link_to "ดาวน์โหลดสลิป", rails_blob_path(@order.payment.slip, disposition: "attachment"), class: "text-violet-600 block mb-4" %>
+          <% end %>
+        <% end %>
 
-    <% if @order.awaiting_admin_review? %>
-      <div class="flex flex-wrap gap-3">
-        <%= button_to "อนุมัติสลิป", approve_admin_payment_path(@order.payment), method: :post, class: "rounded-lg bg-green-600 text-white px-4 py-2" %>
-        <%= form_with url: reject_admin_payment_path(@order.payment), method: :post, class: "flex flex-wrap items-end gap-2" do |f| %>
-          <%= f.text_field :admin_note, placeholder: "เหตุผล (ถ้ามี)", class: "rounded border px-3 py-2" %>
-          <%= f.submit "ปฏิเสธ", class: "rounded-lg bg-red-600 text-white px-4 py-2 cursor-pointer" %>
+        <% if @order.payment.admin_note.present? %>
+          <p class="text-sm text-slate-500 mt-4">หมายเหตุ: <%= @order.payment.admin_note %></p>
         <% end %>
       </div>
     <% end %>
 
-    <% if @order.payment.admin_note.present? %>
-      <p class="text-sm text-slate-600 mt-4">หมายเหตุ: <%= @order.payment.admin_note %></p>
+    <% if @order.paid? || @order.shipped? || @order.completed? %>
+      <div id="shipping-form" class="admin-card p-6 animate-fade-in-up border-2 border-violet-200" style="animation-delay: 0.15s">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-xl">📦</span>
+          <h2 class="font-semibold text-slate-800">จัดส่ง — กรอกเลขพัสดุ</h2>
+        </div>
+
+        <% if @order.tracking_number.present? %>
+          <div class="bg-violet-50 rounded-xl p-4 mb-4 border border-violet-100">
+            <p class="text-sm text-violet-600 font-medium"><%= @order.carrier_label %></p>
+            <p class="text-xl font-mono font-bold text-violet-900 mt-1"><%= @order.tracking_number %></p>
+            <% if @order.tracking_url %>
+              <%= link_to "เปิดลิงก์ติดตาม ↗", @order.tracking_url, target: "_blank", rel: "noopener",
+                  class: "text-sm text-violet-600 hover:text-violet-800 mt-2 inline-block" %>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if @order.paid? %>
+          <%= form_with url: admin_order_path(@order), method: :patch, class: "space-y-4" do |f| %>
+            <div>
+              <label class="block text-sm font-medium text-slate-600 mb-2">ขนส่ง</label>
+              <div class="flex flex-wrap gap-2">
+                <% [["Flash Express", "flash"], ["Kerry Express", "kerry"], ["ไปรษณีย์ไทย", "thailand_post"], ["อื่นๆ", "other"]].each do |label, value| %>
+                  <label class="cursor-pointer">
+                    <%= radio_button_tag :shipping_carrier, value, @order.shipping_carrier == value,
+                        class: "peer sr-only" %>
+                    <span class="inline-block rounded-full px-4 py-2 text-sm border border-slate-200
+                      peer-checked:bg-violet-600 peer-checked:text-white peer-checked:border-violet-600
+                      hover:border-slate-400 transition-all">
+                      <%= label %>
+                    </span>
+                  </label>
+                <% end %>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-600 mb-2">เลขพัสดุ</label>
+              <%= text_field_tag :tracking_number, nil, placeholder: "TH0123456789",
+                  class: "w-full rounded-xl border border-slate-200 px-4 py-3 font-mono focus:border-violet-400 focus:ring-2 focus:ring-violet-100 outline-none" %>
+            </div>
+            <%= submit_tag "🚚 บันทึกและเปลี่ยนเป็น「จัดส่งแล้ว」",
+                class: "rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-6 py-3 font-medium cursor-pointer hover:shadow-lg transition-all" %>
+          <% end %>
+        <% end %>
+
+        <% if @order.shipped? %>
+          <%= button_to "✅ ปิดออเดอร์ (สำเร็จ)", admin_order_path(@order, mark_completed: 1), method: :patch,
+              class: "rounded-xl border-2 border-emerald-200 text-emerald-700 px-5 py-2.5 font-medium hover:bg-emerald-50 transition-colors" %>
+        <% end %>
+      </div>
     <% end %>
   </div>
-<% end %>
 
-<% if @order.paid? || @order.shipped? || @order.completed? %>
-  <div class="bg-white border rounded-lg p-6 mb-6">
-    <h2 class="font-semibold mb-4">เลขพัสดุ / Tracking</h2>
-    <% if @order.tracking_number.present? %>
-      <p class="text-lg font-medium"><%= @order.tracking_number %></p>
-    <% end %>
+  <div class="lg:col-span-2 space-y-6">
+    <div class="admin-card p-6 animate-fade-in-up" style="animation-delay: 0.05s">
+      <h2 class="font-semibold mb-3 text-slate-800">ที่อยู่จัดส่ง</h2>
+      <p class="text-slate-700"><%= @order.recipient_name %></p>
+      <p class="text-slate-500 text-sm"><%= @order.phone %></p>
+      <p class="whitespace-pre-line text-slate-500 text-sm mt-2"><%= @order.address %></p>
+    </div>
 
-    <% if @order.paid? %>
-      <%= form_with url: admin_order_path(@order), method: :patch, class: "mt-4 flex flex-wrap gap-2" do |f| %>
-        <%= f.text_field :tracking_number, placeholder: "กรอกเลขพัสดุ", class: "rounded border px-3 py-2" %>
-        <%= f.submit "บันทึกและเปลี่ยนเป็นจัดส่งแล้ว", class: "rounded-lg bg-indigo-600 text-white px-4 py-2 cursor-pointer" %>
+    <div class="admin-card p-6 animate-fade-in-up" style="animation-delay: 0.1s">
+      <h2 class="font-semibold mb-3 text-slate-800">รายการ</h2>
+      <% @order.order_items.each do |item| %>
+        <div class="flex justify-between text-sm py-2 border-b border-slate-50 last:border-0">
+          <span class="text-slate-600"><%= item.product_variant.product.name %> (<%= item.product_variant.display_label %>) × <%= item.quantity %></span>
+          <span class="text-slate-800 font-medium"><%= format_baht(item.subtotal) %></span>
+        </div>
       <% end %>
-    <% end %>
-
-    <% if @order.shipped? %>
-      <%= button_to "ปิดออเดอร์ (สำเร็จ)", admin_order_path(@order, mark_completed: 1), method: :patch, class: "mt-4 rounded-lg border px-4 py-2" %>
-    <% end %>
+      <div class="flex justify-between font-bold mt-4 pt-3 border-t border-slate-100">
+        <span class="text-slate-800">รวม</span>
+        <span class="text-violet-600"><%= format_baht(@order.total_amount) %></span>
+      </div>
+    </div>
   </div>
-<% end %>
+</div>

@@ -1,0 +1,57 @@
+<div class="order-timeline animate-fade-in-up">
+  <h2 class="text-sm font-medium text-white/50 uppercase tracking-wide mb-6">สถานะคำสั่งซื้อ</h2>
+
+  <div class="relative">
+    <% order.timeline_steps.each_with_index do |step, i| %>
+      <% is_last = i == order.timeline_steps.length - 1 %>
+      <div class="flex gap-4 <%= is_last ? '' : 'pb-8' %> relative">
+        <% unless is_last %>
+          <div class="timeline-line absolute left-[19px] top-10 bottom-0 w-0.5
+            <%= step[:state] == :done ? 'bg-violet-500/60' : 'bg-white/10' %>"></div>
+        <% end %>
+
+        <div class="relative z-10 shrink-0">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all duration-500
+            <%= case step[:state]
+                when :done then 'bg-violet-500/30 border-2 border-violet-400 shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                when :current then 'bg-violet-500/40 border-2 border-violet-400 animate-pulse-glow scale-110'
+                when :failed then 'bg-red-500/20 border-2 border-red-400'
+                else 'bg-white/5 border-2 border-white/10 grayscale opacity-40'
+                end %>">
+            <%= step[:icon] %>
+          </div>
+        </div>
+
+        <div class="pt-1.5 min-w-0 flex-1">
+          <p class="font-semibold <%= step[:state] == :pending ? 'text-white/30' : 'text-white' %>">
+            <%= step[:label] %>
+            <% if step[:state] == :current %>
+              <span class="ml-2 text-xs font-normal text-violet-400 animate-fade-in">← ขั้นตอนปัจจุบัน</span>
+            <% elsif step[:state] == :failed %>
+              <span class="ml-2 text-xs font-normal text-red-400">ไม่ผ่าน</span>
+            <% end %>
+          </p>
+          <p class="text-sm mt-0.5 <%= step[:state] == :pending ? 'text-white/20' : 'text-white/40' %>">
+            <%= step[:desc] %>
+          </p>
+
+          <% if step[:key] == :shipped && order.tracking_number.present? && step[:state] != :pending %>
+            <div class="mt-3 glass rounded-xl p-4 inline-block w-full max-w-sm">
+              <p class="text-xs text-white/40 mb-1"><%= order.carrier_label || "ขนส่ง" %></p>
+              <p class="font-mono text-white font-medium"><%= order.tracking_number %></p>
+              <% if order.shipped_at %>
+                <p class="text-xs text-white/40 mt-1">จัดส่งเมื่อ <%= l(order.shipped_at, format: :long) %></p>
+              <% end %>
+              <% if order.tracking_url %>
+                <%= link_to order.tracking_url, target: "_blank", rel: "noopener",
+                    class: "btn-primary !text-sm !py-2 !px-4 mt-3 inline-flex" do %>
+                  ติดตามพัสดุ ↗
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

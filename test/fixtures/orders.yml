@@ -1,0 +1,26 @@
+paid_order:
+  user: customer
+  status: 2
+  total_amount: 500.00
+  recipient_name: Test Customer
+  phone: "0812345678"
+  address: "123 Test St"
+
+shipped_order:
+  user: customer
+  status: 3
+  total_amount: 300.00
+  recipient_name: Test Customer
+  phone: "0812345678"
+  address: "123 Test St"
+  tracking_number: "TH999888"
+  shipping_carrier: 0
+  shipped_at: <%= 1.day.ago %>
+
+submitted_order:
+  user: customer
+  status: 1
+  total_amount: 500.00
+  recipient_name: Test Customer
+  phone: "0812345678"
+  address: "123 Test St"

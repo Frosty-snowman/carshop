@@ -1,41 +1,54 @@
-<%= link_to "← กลับ", products_path, class: "text-sm text-slate-600 mb-4 inline-block" %>
+<% style = category_style(@product.category) %>
 
-<div class="grid lg:grid-cols-2 gap-8">
-  <div class="bg-white rounded-xl border overflow-hidden">
-    <div class="aspect-[3/4] bg-slate-100 flex items-center justify-center">
+<%= link_to products_path, class: "btn-ghost mb-6 inline-flex animate-fade-in" do %>
+  ← กลับ
+<% end %>
+
+<div class="grid lg:grid-cols-2 gap-10 animate-fade-in-up">
+  <div class="product-card rounded-2xl overflow-hidden animate-pulse-glow">
+    <div class="aspect-[3/4] bg-gradient-to-br from-white/5 to-white/[0.02] flex items-center justify-center">
       <% if @product.image.attached? %>
         <%= image_tag @product.image, class: "w-full h-full object-cover" %>
       <% else %>
-        <span class="text-slate-400">No image</span>
+        <span class="text-6xl opacity-20"><%= style[:emoji] %></span>
       <% end %>
     </div>
   </div>
 
   <div>
-    <p class="text-sm text-slate-500"><%= @product.category.name %></p>
-    <h1 class="text-3xl font-bold mt-2"><%= @product.name %></h1>
-    <p class="text-slate-600 mt-4 whitespace-pre-line"><%= @product.description %></p>
+    <span class="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1 rounded-full glass #{style[:text]} mb-4">
+      <%= style[:emoji] %> <%= @product.category.name %>
+    </span>
+    <h1 class="text-3xl md:text-4xl font-bold mb-4"><%= @product.name %></h1>
+    <p class="text-white/50 leading-relaxed whitespace-pre-line"><%= @product.description %></p>
 
-    <div class="mt-8 space-y-4">
-      <h2 class="font-semibold">เลือกสภาพ / ภาษา</h2>
-      <% @product.product_variants.order(:condition, :language).each do |variant| %>
-        <div class="bg-white border rounded-lg p-4 flex flex-wrap items-center justify-between gap-4">
+    <div class="mt-10 space-y-3">
+      <h2 class="section-title text-lg mb-4">เลือกสภาพ / ภาษา</h2>
+      <% @product.product_variants.order(:condition, :language).each_with_index do |variant, i| %>
+        <div class="glass rounded-xl p-5 flex flex-wrap items-center justify-between gap-4 transition-all duration-300 hover:border-white/15 animate-fade-in-up"
+             style="animation-delay: <%= 0.1 * i %>s">
           <div>
-            <p class="font-medium"><%= variant.display_label %></p>
-            <p class="text-indigo-600"><%= format_baht(variant.price) %></p>
-            <p class="text-sm text-slate-500">คงเหลือ <%= variant.stock_quantity %> ใบ</p>
+            <p class="font-medium text-white"><%= variant.display_label %></p>
+            <p class="text-xl font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent mt-1">
+              <%= format_baht(variant.price) %>
+            </p>
+            <p class="text-sm mt-1 <%= variant.in_stock? ? 'text-white/40' : 'text-red-400' %>">
+              <%= variant.in_stock? ? "คงเหลือ #{variant.stock_quantity} ใบ" : "หมดสต็อก" %>
+            </p>
           </div>
 
           <% if user_signed_in? && current_user.customer? && variant.in_stock? %>
-            <%= form_with url: cart_items_path, method: :post, class: "flex items-center gap-2" do |f| %>
+            <%= form_with url: cart_items_path, method: :post, class: "flex items-center gap-2" do %>
               <%= hidden_field_tag :product_variant_id, variant.id %>
-              <%= number_field_tag :quantity, 1, min: 1, max: variant.stock_quantity, class: "w-16 rounded border px-2 py-1" %>
-              <%= submit_tag "ใส่ตะกร้า", class: "rounded-lg bg-slate-900 text-white px-4 py-2 cursor-pointer" %>
+              <%= number_field_tag :quantity, 1, min: 1, max: variant.stock_quantity, class: "input-field !w-20 !py-2 text-center" %>
+              <%= submit_tag "ใส่ตะกร้า", class: "btn-primary !py-2 !px-5 text-sm" %>
             <% end %>
           <% elsif !user_signed_in? %>
-            <p class="text-sm text-slate-500"><%= link_to "Login", new_user_session_path, class: "text-indigo-600" %> เพื่อสั่งซื้อ</p>
+            <p class="text-sm text-white/40">
+              <%= link_to "Login", new_user_session_path, class: "text-violet-400 hover:text-violet-300 transition-colors" %> เพื่อสั่งซื้อ
+            </p>
           <% else %>
-            <p class="text-sm text-red-600">หมดสต็อก</p>
+            <span class="text-sm text-red-400/80 font-medium px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/20">หมดสต็อก</span>
           <% end %>
         </div>
       <% end %>

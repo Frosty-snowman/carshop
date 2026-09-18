@@ -11,7 +11,8 @@ class PaymentApprover
   end
 
   def call
-    raise Error, "อนุมัติไม่ได้ในสถานะนี้" unless payment.pending? && payment.order.payment_submitted?
+    approvable = payment.pending? && (payment.order.payment_submitted? || payment.order.pending_payment?)
+    raise Error, "อนุมัติไม่ได้ในสถานะนี้" unless approvable
 
     Order.transaction do
       payment.order.order_items.includes(:product_variant).each do |item|

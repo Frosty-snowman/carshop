@@ -1,16 +1,35 @@
-<%= link_to product_path(product), class: "block bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-md transition" do %>
-  <div class="aspect-[3/4] bg-slate-100 flex items-center justify-center">
+<% style = category_style(product.category) %>
+<%= link_to product_path(product),
+    class: "product-card block animate-fade-in-up",
+    style: ("animation-delay: #{0.05 * (local_assigns[:index] || 0)}s" if local_assigns[:index]) do %>
+  <div class="aspect-[3/4] bg-gradient-to-br from-white/5 to-white/[0.02] flex items-center justify-center overflow-hidden relative">
     <% if product.image.attached? %>
-      <%= image_tag product.image, class: "w-full h-full object-cover" %>
+      <%= image_tag product.image, class: "w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" %>
     <% else %>
-      <span class="text-slate-400">No image</span>
+      <div class="flex flex-col items-center gap-2 text-white/20">
+        <span class="text-5xl"><%= style[:emoji] %></span>
+        <span class="text-xs">No image</span>
+      </div>
     <% end %>
+    <div class="absolute top-3 left-3">
+      <span class="text-xs font-medium px-2.5 py-1 rounded-full glass #{style[:text]}">
+        <%= style[:emoji] %> <%= product.category.name %>
+      </span>
+    </div>
   </div>
   <div class="p-4">
-    <p class="text-xs text-slate-500"><%= product.category.name %></p>
-    <h3 class="font-semibold text-slate-900 mt-1"><%= product.name %></h3>
+    <h3 class="font-semibold text-white truncate"><%= product.name %></h3>
     <% if product.min_price %>
-      <p class="text-indigo-600 font-medium mt-2">เริ่มต้น <%= format_baht(product.min_price) %></p>
+      <p class="mt-2 flex items-baseline gap-1">
+        <span class="text-xs text-white/40">เริ่มต้น</span>
+        <span class="text-lg font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
+          <%= format_baht(product.min_price) %>
+        </span>
+      </p>
     <% end %>
+    <% total_stock = product.product_variants.sum(:stock_quantity) %>
+    <p class="text-xs text-white/30 mt-2">
+      <%= total_stock > 0 ? "มี #{total_stock} ใบ" : "หมดสต็อก" %>
+    </p>
   </div>
 <% end %>

@@ -1,0 +1,9 @@
+pikachu:
+  name: Pikachu VMAX
+  description: Sample card
+  category: pokemon
+
+blue_eyes:
+  name: Blue-Eyes White Dragon
+  description: Sample card
+  category: yugioh

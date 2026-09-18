@@ -1,0 +1,14 @@
+<% if notice.present? %>
+  <div class="max-w-6xl mx-auto px-4 mt-4 flash-notice">
+    <p class="glass-strong rounded-xl text-emerald-300 px-5 py-3 border border-emerald-500/20 flex items-center gap-2">
+      <span>✓</span> <%= notice %>
+    </p>
+  </div>
+<% end %>
+<% if alert.present? %>
+  <div class="max-w-6xl mx-auto px-4 mt-4 flash-notice">
+    <p class="glass-strong rounded-xl text-red-300 px-5 py-3 border border-red-500/20 flex items-center gap-2">
+      <span>!</span> <%= alert %>
+    </p>
+  </div>
+<% end %>
