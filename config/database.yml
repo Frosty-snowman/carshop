@@ -78,6 +78,7 @@ production:
   primary: &primary_production
     <<: *default
     url: <%= ENV["DATABASE_URL"] %>
+    sslmode: <%= ENV.fetch("PGSSLMODE", "require") %>
   cache:
     <<: *primary_production
     migrations_paths: db/cache_migrate

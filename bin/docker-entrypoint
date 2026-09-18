@@ -1,8 +1,45 @@
 #!/bin/bash -e
 
-# If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+  if [ -z "$SECRET_KEY_BASE" ] && [ -z "$RAILS_MASTER_KEY" ]; then
+    echo "FATAL: Set SECRET_KEY_BASE or RAILS_MASTER_KEY in Railway Variables"
+    exit 1
+  fi
+
+  if [ -z "$DATABASE_URL" ]; then
+    echo "FATAL: DATABASE_URL not set — add PostgreSQL plugin and link it to this service"
+    exit 1
+  fi
+
+  echo "==> Preparing database..."
   ./bin/rails db:prepare
+
+  echo "==> Ensuring Solid Queue / Cache / Cable tables..."
+  ./bin/rails runner "
+    conn = ActiveRecord::Base.connection
+    unless conn.table_exists?('solid_queue_jobs')
+      puts 'Loading solid_queue schema...'
+      abort('solid_queue schema load failed') unless system(
+        { 'DISABLE_DATABASE_ENVIRONMENT_CHECK' => '1' },
+        'bin/rails', 'db:schema:load:queue'
+      )
+    end
+    unless conn.table_exists?('solid_cache_entries')
+      puts 'Loading solid_cache schema...'
+      abort('solid_cache schema load failed') unless system(
+        { 'DISABLE_DATABASE_ENVIRONMENT_CHECK' => '1' },
+        'bin/rails', 'db:schema:load:cache'
+      )
+    end
+    unless conn.table_exists?('solid_cable_messages')
+      puts 'Loading solid_cable schema...'
+      abort('solid_cable schema load failed') unless system(
+        { 'DISABLE_DATABASE_ENVIRONMENT_CHECK' => '1' },
+        'bin/rails', 'db:schema:load:cable'
+      )
+    end
+    puts 'Solid schemas OK'
+  "
 fi
 
 exec "${@}"
