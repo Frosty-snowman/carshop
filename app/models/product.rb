@@ -18,4 +18,8 @@ class Product < ApplicationRecord
   def min_price
     product_variants.minimum(:price)
   end
+
+  def deletable?
+    !product_variants.joins(:order_items).exists?
+  end
 end

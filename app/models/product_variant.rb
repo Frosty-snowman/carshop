@@ -6,6 +6,16 @@ class ProductVariant < ApplicationRecord
   enum :condition, { new_condition: 0, used: 1 }, prefix: :condition
   enum :language, { th: 0, en: 1, ja: 2 }
 
+  LANGUAGE_LABELS = {
+    "th" => "ภาษาไทย",
+    "en" => "En",
+    "ja" => "Jp"
+  }.freeze
+
+  def self.language_options
+    languages.keys.map { |key| [ LANGUAGE_LABELS[key], key ] }
+  end
+
   validates :price, numericality: { greater_than: 0 }
   validates :stock_quantity, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :reserved_quantity, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
@@ -36,7 +46,7 @@ class ProductVariant < ApplicationRecord
   end
 
   def language_label
-    { "th" => "ไทย", "en" => "English", "ja" => "日本語" }[language]
+    LANGUAGE_LABELS[language]
   end
 
   def subtotal_for(quantity)

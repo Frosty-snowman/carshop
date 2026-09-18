@@ -9,6 +9,11 @@ class ProductVariantTest < ActiveSupport::TestCase
     assert_equal 15, variant.reload.stock_quantity
   end
 
+  test "language_label uses Thai En Jp labels" do
+    assert_equal "ภาษาไทย", product_variants(:pikachu_new_th).language_label
+    assert_equal "En", product_variants(:blue_eyes_new_en).language_label
+  end
+
   test "replenish! rejects zero or negative amounts" do
     variant = product_variants(:pikachu_new_th)
 

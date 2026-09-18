@@ -11,7 +11,7 @@
   </div>
   <div>
     <%= f.label :language, "ภาษา", class: "block text-sm mb-1" %>
-    <%= f.select :language, [["ไทย", "th"], ["English", "en"], ["日本語", "ja"]], {}, class: "w-full rounded border px-3 py-2" %>
+    <%= f.select :language, ProductVariant.language_options, {}, class: "w-full rounded border px-3 py-2" %>
   </div>
   <div>
     <%= f.label :price, "ราคา (บาท)", class: "block text-sm mb-1" %>

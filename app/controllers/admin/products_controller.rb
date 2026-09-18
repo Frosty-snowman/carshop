@@ -39,6 +39,11 @@ module Admin
     end
 
     def destroy
+      unless @product.deletable?
+        redirect_to admin_product_path(@product), alert: "ลบไม่ได้ เพราะมีประวัติออเดอร์ที่เกี่ยวข้อง"
+        return
+      end
+
       @product.destroy
       redirect_to admin_products_path, notice: "ลบการ์ดแล้ว"
     end
