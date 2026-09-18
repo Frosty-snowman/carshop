@@ -33,14 +33,14 @@
               <%= format_baht(variant.price) %>
             </p>
             <p class="text-sm mt-1 <%= variant.in_stock? ? 'text-white/40' : 'text-red-400' %>">
-              <%= variant.in_stock? ? "คงเหลือ #{variant.stock_quantity} ใบ" : "หมดสต็อก" %>
+              <%= variant.in_stock? ? "คงเหลือ #{variant.available_quantity} ใบ" : "หมดสต็อก" %>
             </p>
           </div>
 
           <% if user_signed_in? && current_user.customer? && variant.in_stock? %>
             <%= form_with url: cart_items_path, method: :post, class: "flex items-center gap-2" do %>
               <%= hidden_field_tag :product_variant_id, variant.id %>
-              <%= number_field_tag :quantity, 1, min: 1, max: variant.stock_quantity, class: "input-field !w-20 !py-2 text-center" %>
+              <%= number_field_tag :quantity, 1, min: 1, max: variant.available_quantity, class: "input-field !w-20 !py-2 text-center" %>
               <%= submit_tag "ใส่ตะกร้า", class: "btn-primary !py-2 !px-5 text-sm" %>
             <% end %>
           <% elsif !user_signed_in? %>

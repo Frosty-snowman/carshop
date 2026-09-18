@@ -1,7 +1,33 @@
 <%= link_to "← คำสั่งซื้อทั้งหมด", orders_path, class: "btn-ghost mb-6 inline-flex animate-fade-in" %>
 
+<% if @order.cancelled? %>
+  <div class="glass-strong rounded-2xl p-6 mb-8 border border-red-500/30 text-center animate-fade-in-up">
+    <span class="text-4xl">❌</span>
+    <h2 class="text-xl font-bold text-red-300 mt-3">ออเดอร์ถูกยกเลิก</h2>
+    <p class="text-white/50 text-sm mt-2">
+      <% if @order.payment_deadline_at.present? %>
+        หมดเวลาชำระเงิน (<%= Order::PAYMENT_WINDOW_MINUTES %> นาที) — สต็อกถูกคืนแล้ว
+      <% else %>
+        ออเดอร์นี้ถูกยกเลิก
+      <% end %>
+    </p>
+    <%= link_to "เลือกการ์ดใหม่", products_path, class: "btn-primary mt-6 inline-flex" %>
+  </div>
+<% end %>
+
+<% if @order.can_upload_slip? %>
+  <%= render "orders/payment_action", order: @order, shop_setting: @shop_setting, scroll_here: params[:pay].present? %>
+<% end %>
+
+<% if @order.payment_submitted? %>
+  <div class="glass-strong rounded-2xl p-6 mb-8 border border-blue-500/30 text-center animate-fade-in-up">
+    <span class="text-4xl">✅</span>
+    <h2 class="text-xl font-bold text-blue-300 mt-3">ส่งสลิปแล้ว — รอร้านตรวจสอบ</h2>
+    <p class="text-white/50 text-sm mt-2">ไม่ต้องทำอะไรเพิ่ม เราจะแจ้งเมื่อตรวจสอบเสร็จ</p>
+  </div>
+<% end %>
+
 <div class="grid lg:grid-cols-5 gap-8 animate-fade-in-up">
-  <%# Timeline — 3 cols %>
   <div class="lg:col-span-3 glass-strong rounded-2xl p-6 md:p-8">
     <div class="flex flex-wrap justify-between gap-4 mb-6">
       <div>
@@ -16,6 +42,7 @@
             when 'shipped' then 'bg-violet-500/20 text-violet-300 border border-violet-500/30'
             when 'completed' then 'bg-white/10 text-white/60 border border-white/20'
             when 'payment_rejected' then 'bg-red-500/20 text-red-300 border border-red-500/30'
+            when 'cancelled' then 'bg-red-500/20 text-red-400 border border-red-500/30'
             else 'bg-white/10 text-white/50'
             end %>">
         <%= @order.status_label %>
@@ -25,12 +52,14 @@
     <%= render "shared/order_timeline", order: @order %>
   </div>
 
-  <%# Sidebar — 2 cols %>
   <div class="lg:col-span-2 space-y-6">
     <div class="glass rounded-2xl p-6">
       <h2 class="font-semibold mb-3 text-white/80">ที่อยู่จัดส่ง</h2>
       <p class="text-white"><%= @order.recipient_name %></p>
       <p class="text-white/60 text-sm"><%= @order.phone %></p>
+      <% if @order.postal_code.present? %>
+        <p class="text-white/50 text-sm mt-1">รหัสไปรษณีย์: <span class="font-mono"><%= @order.postal_code %></span></p>
+      <% end %>
       <p class="whitespace-pre-line text-white/50 text-sm mt-2"><%= @order.address %></p>
     </div>
 
@@ -42,6 +71,14 @@
           <span class="text-white/90"><%= format_baht(item.subtotal) %></span>
         </div>
       <% end %>
+      <div class="flex justify-between text-sm py-2 mt-2 text-white/50">
+        <span>สินค้า</span>
+        <span><%= format_baht(@order.subtotal_amount) %></span>
+      </div>
+      <div class="flex justify-between text-sm py-2 text-white/50">
+        <span>ค่าส่ง</span>
+        <span><%= format_baht(@order.shipping_fee) %></span>
+      </div>
       <div class="flex justify-between font-bold mt-4 pt-3 border-t border-white/10">
         <span class="text-white">รวม</span>
         <span class="text-lg bg-gradient-to-r from-violet-400 to-amber-400 bg-clip-text text-transparent">
@@ -52,41 +89,14 @@
   </div>
 </div>
 
-<% if @order.can_upload_slip? %>
-  <div class="glass-strong rounded-2xl p-6 mt-8 animate-fade-in-up" style="animation-delay: 0.15s">
-    <h2 class="font-semibold mb-4 text-white/80">แนบสลิปโอนเงิน</h2>
-
-    <div class="mb-6 text-sm text-white/50 glass rounded-xl p-4">
-      <p>ธนาคาร: <span class="text-white/80"><%= @shop_setting.bank_name %></span></p>
-      <p>เลขบัญชี: <span class="text-white/80 font-mono"><%= @shop_setting.account_number %></span> (<%= @shop_setting.account_name %>)</p>
-      <% if @shop_setting.qr_code.attached? %>
-        <div class="mt-3"><%= image_tag @shop_setting.qr_code, class: "max-w-xs rounded-xl border border-white/10" %></div>
-      <% end %>
-    </div>
-
-    <%= form_with model: @order.payment, url: order_payment_path(@order), method: :patch, html: { multipart: true }, class: "space-y-4" do |f| %>
-      <div>
-        <p class="text-sm mb-2 text-white/60">วิธีชำระ</p>
-        <label class="flex items-center gap-2 mb-2 text-white/70 cursor-pointer">
-          <%= f.radio_button :method, "bank_transfer", checked: @order.payment.bank_transfer?, class: "accent-violet-500" %>
-          โอนบัญชี
-        </label>
-        <label class="flex items-center gap-2 text-white/70 cursor-pointer">
-          <%= f.radio_button :method, "qr", checked: @order.payment.qr?, class: "accent-violet-500" %>
-          QR Code
-        </label>
-      </div>
-      <div>
-        <%= f.label :slip, "ไฟล์สลิป (JPG, PNG, PDF)", class: "block text-sm mb-2 text-white/60" %>
-        <%= f.file_field :slip, required: true, accept: "image/jpeg,image/png,image/webp,application/pdf", class: "block text-white/50" %>
-      </div>
-      <%= f.submit "ส่งสลิป", class: "btn-primary" %>
-    <% end %>
+<% if @order.payment_rejected? && !@order.can_upload_slip? %>
+  <div class="glass rounded-2xl p-6 mt-8 border border-red-500/30 text-center">
+    <p class="text-red-300">หมดเวลาแนบสลิปใหม่ — ออเดอร์จะถูกยกเลิกเมื่อ refresh หน้านี้</p>
   </div>
 <% end %>
 
 <% if @order.payment&.slip&.attached? %>
-  <div class="glass rounded-2xl p-6 mt-8 animate-fade-in-up" style="animation-delay: 0.2s">
+  <div class="glass rounded-2xl p-6 mt-8 animate-fade-in-up">
     <h2 class="font-semibold mb-4 text-white/80">สลิปที่แนบ</h2>
     <p class="text-sm text-white/50 mb-2"><%= @order.payment.method_label %> — <%= @order.payment.status_label %></p>
     <% if @order.payment.slip.content_type.start_with?("image/") %>

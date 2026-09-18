@@ -16,7 +16,7 @@
           </div>
           <div class="flex items-center gap-3">
             <%= form_with model: item, url: cart_item_path(item), method: :patch, class: "flex items-center gap-2" do |f| %>
-              <%= f.number_field :quantity, min: 1, max: item.product_variant.stock_quantity, class: "input-field !w-20 !py-2 text-center" %>
+              <%= f.number_field :quantity, min: 1, max: item.product_variant.available_quantity, class: "input-field !w-20 !py-2 text-center" %>
               <%= f.submit "อัปเดต", class: "btn-secondary !py-2 !px-4 text-sm" %>
             <% end %>
             <%= button_to "ลบ", cart_item_path(item), method: :delete, class: "text-sm text-red-400/70 hover:text-red-400 transition-colors px-2" %>

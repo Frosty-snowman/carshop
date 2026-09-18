@@ -14,8 +14,8 @@ class CartItem < ApplicationRecord
   def quantity_within_stock
     return if product_variant.blank?
 
-    if quantity > product_variant.stock_quantity
-      errors.add(:quantity, "เกินจำนวนในสต็อก (เหลือ #{product_variant.stock_quantity} ใบ)")
+    if quantity > product_variant.available_quantity
+      errors.add(:quantity, "เกินจำนวนในสต็อก (เหลือ #{product_variant.available_quantity} ใบ)")
     end
   end
 end

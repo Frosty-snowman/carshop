@@ -1,0 +1,39 @@
+<h1 class="text-3xl font-bold mb-2 animate-fade-in-up">💡 ส่งคำร้อง / แนะนำฟีเจอร์</h1>
+<p class="text-white/40 mb-8 animate-fade-in-up">อยากให้ร้านมีอะไรเพิ่ม? บอกเราได้เลย — Admin คนเดียวอ่านทุกคำร้อง!</p>
+
+<div class="max-w-xl animate-fade-in-up" style="animation-delay: 0.1s">
+  <div class="glass-strong rounded-2xl p-6">
+    <%= form_with model: @feature_request, class: "space-y-4" do |f| %>
+      <% if @feature_request.errors.any? %>
+        <div class="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+          <%= @feature_request.errors.full_messages.to_sentence %>
+        </div>
+      <% end %>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <%= f.label :name, "ชื่อ", class: "block text-sm mb-2 text-white/60" %>
+          <%= f.text_field :name, required: true, class: "input-field" %>
+        </div>
+        <div>
+          <%= f.label :email, "อีเมล", class: "block text-sm mb-2 text-white/60" %>
+          <%= f.email_field :email, required: true, class: "input-field" %>
+        </div>
+      </div>
+
+      <div>
+        <%= f.label :title, "หัวข้อ", class: "block text-sm mb-2 text-white/60" %>
+        <%= f.text_field :title, required: true, placeholder: "เช่น อยากให้ค้นหาการ์ดตาม set ได้", class: "input-field" %>
+      </div>
+
+      <div>
+        <%= f.label :description, "รายละเอียด", class: "block text-sm mb-2 text-white/60" %>
+        <%= f.text_area :description, required: true, rows: 5,
+            placeholder: "อธิบายว่าอยากให้ทำอะไร ทำไมถึงอยากได้ฟีเจอร์นี้",
+            class: "input-field" %>
+      </div>
+
+      <%= f.submit "ส่งคำร้อง", class: "btn-primary w-full !py-3" %>
+    <% end %>
+  </div>
+</div>

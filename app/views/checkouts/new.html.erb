@@ -1,7 +1,7 @@
 <h1 class="text-3xl font-bold mb-2 animate-fade-in-up">ชำระเงิน</h1>
-<p class="text-white/40 mb-8 animate-fade-in-up">กรอกที่อยู่จัดส่งและยืนยันคำสั่งซื้อ</p>
+<p class="text-white/40 mb-8 animate-fade-in-up">กรอกที่อยู่จัดส่งและยืนยันคำสั่งซื้อ — หลังยืนยันจะจองสต็อกให้ <strong class="text-amber-400/90"><%= Order::PAYMENT_WINDOW_MINUTES %> นาที</strong> เพื่อโอนเงิน</p>
 
-<div class="grid lg:grid-cols-2 gap-8 animate-fade-in-up" style="animation-delay: 0.1s">
+<div class="grid lg:grid-cols-2 gap-8 animate-fade-in-up" style="animation-delay: 0.1s" data-controller="payment-method">
   <div class="glass-strong rounded-2xl p-6">
     <h2 class="font-semibold mb-5 text-white/80">ที่อยู่จัดส่ง</h2>
     <%= form_with url: checkout_path, scope: :checkout, class: "space-y-4" do |f| %>
@@ -14,23 +14,34 @@
         <%= f.text_field :phone, required: true, class: "input-field" %>
       </div>
       <div>
-        <%= f.label :address, "ที่อยู่", class: "block text-sm mb-2 text-white/60" %>
-        <%= f.text_area :address, required: true, rows: 4, class: "input-field" %>
+        <%= f.label :postal_code, "รหัสไปรษณีย์", class: "block text-sm mb-2 text-white/60" %>
+        <%= f.text_field :postal_code, required: true, maxlength: 5, inputmode: "numeric",
+            placeholder: "เช่น 10110", class: "input-field font-mono tracking-widest" %>
+      </div>
+      <div>
+        <%= f.label :address, "ที่อยู่ (บ้านเลขที่, ถนน, ตำบล, อำเภอ, จังหวัด)", class: "block text-sm mb-2 text-white/60" %>
+        <%= f.text_area :address, required: true, rows: 3, class: "input-field" %>
       </div>
 
       <div>
         <p class="font-semibold mb-3 text-white/80">วิธีชำระเงิน</p>
         <label class="flex items-center gap-2 mb-2 text-white/60 cursor-pointer">
-          <%= f.radio_button :payment_method, "bank_transfer", checked: true, class: "accent-violet-500" %>
+          <%= f.radio_button :payment_method, "bank_transfer", checked: true, class: "accent-violet-500",
+              data: { action: "change->payment-method#toggle" } %>
           โอนบัญชีธนาคาร
         </label>
         <label class="flex items-center gap-2 text-white/60 cursor-pointer">
-          <%= f.radio_button :payment_method, "qr", class: "accent-violet-500" %>
+          <%= f.radio_button :payment_method, "qr", class: "accent-violet-500",
+              data: { action: "change->payment-method#toggle" } %>
           QR Code
         </label>
       </div>
 
-      <%= f.submit "ยืนยันคำสั่งซื้อ", class: "btn-primary w-full !py-3 mt-2" %>
+      <div class="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200/90">
+        ⏱ หลังกดยืนยัน ระบบจะ<strong>จองสต็อก</strong>ให้ทันที — โปรดโอนเงินภายใน <%= Order::PAYMENT_WINDOW_MINUTES %> นาที มิฉะนั้นออเดอร์จะถูกยกเลิกอัตโนมัติ
+      </div>
+
+      <%= f.submit "ยืนยันและจองสต็อก", class: "btn-primary w-full !py-3 mt-2" %>
     <% end %>
   </div>
 
@@ -43,28 +54,41 @@
           <span class="text-white/80"><%= format_baht(item.subtotal) %></span>
         </div>
       <% end %>
-      <div class="flex justify-between mt-4 pt-3">
-        <span class="font-bold text-white">รวม</span>
+      <div class="flex justify-between text-sm py-2 mt-2">
+        <span class="text-white/50">สินค้า</span>
+        <span class="text-white/80"><%= format_baht(cart_total) %></span>
+      </div>
+      <div class="flex justify-between text-sm py-2">
+        <span class="text-white/50">ค่าส่ง</span>
+        <span class="text-white/80"><%= format_baht(ShippingFeeCalculator::FEE) %></span>
+      </div>
+      <div class="flex justify-between mt-4 pt-3 border-t border-white/10">
+        <span class="font-bold text-white">รวมทั้งสิ้น</span>
         <span class="text-xl font-bold bg-gradient-to-r from-violet-400 to-amber-400 bg-clip-text text-transparent">
-          <%= format_baht(cart_total) %>
+          <%= format_baht(cart_total + ShippingFeeCalculator::FEE) %>
         </span>
       </div>
     </div>
 
-    <div class="glass rounded-2xl p-6">
-      <h2 class="font-semibold mb-4 text-white/80">ข้อมูลโอนเงิน</h2>
+    <div data-payment-method-target="bankPanel" class="glass rounded-2xl p-6">
+      <h2 class="font-semibold mb-4 text-white/80">ข้อมูลโอนบัญชี</h2>
       <div class="space-y-1 text-sm text-white/50">
         <p><strong class="text-white/80"><%= @shop_setting.bank_name %></strong></p>
         <p>เลขบัญชี: <span class="font-mono text-white/80"><%= @shop_setting.account_number %></span></p>
         <p>ชื่อบัญชี: <span class="text-white/80"><%= @shop_setting.account_name %></span></p>
       </div>
-      <% if @shop_setting.qr_code.attached? %>
-        <div class="mt-4">
-          <%= image_tag @shop_setting.qr_code, class: "max-w-xs rounded-xl border border-white/10" %>
-        </div>
-      <% end %>
       <% if @shop_setting.payment_instructions.present? %>
         <p class="text-sm text-white/40 mt-4 whitespace-pre-line"><%= @shop_setting.payment_instructions %></p>
+      <% end %>
+    </div>
+
+    <div data-payment-method-target="qrPanel" class="glass rounded-2xl p-6 hidden">
+      <h2 class="font-semibold mb-4 text-white/80">ชำระด้วย QR Code</h2>
+      <% if @shop_setting.qr_code.attached? %>
+        <%= image_tag @shop_setting.qr_code, class: "max-w-xs rounded-xl border border-white/10" %>
+        <p class="text-sm text-white/40 mt-4">สแกน QR แล้วแนบสลิปในหน้าออเดอร์</p>
+      <% else %>
+        <p class="text-white/40 text-sm">ยังไม่ได้ตั้งค่า QR Code — ติดต่อร้าน</p>
       <% end %>
     </div>
   </div>

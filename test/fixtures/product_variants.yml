@@ -4,6 +4,7 @@ pikachu_new_th:
   language: 0
   price: 500.00
   stock_quantity: 10
+  reserved_quantity: 1
 
 blue_eyes_new_en:
   product: blue_eyes
@@ -11,3 +12,4 @@ blue_eyes_new_en:
   language: 1
   price: 300.00
   stock_quantity: 3
+  reserved_quantity: 2

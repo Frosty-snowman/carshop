@@ -8,10 +8,16 @@ class ProductVariant < ApplicationRecord
 
   validates :price, numericality: { greater_than: 0 }
   validates :stock_quantity, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validates :reserved_quantity, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validate :reserved_not_exceed_stock
   validates :condition, uniqueness: { scope: %i[product_id language] }
 
+  def available_quantity
+    stock_quantity - reserved_quantity
+  end
+
   def in_stock?
-    stock_quantity.positive?
+    available_quantity.positive?
   end
 
   def replenish!(amount)
@@ -35,5 +41,13 @@ class ProductVariant < ApplicationRecord
 
   def subtotal_for(quantity)
     price * quantity
+  end
+
+  private
+
+  def reserved_not_exceed_stock
+    return if reserved_quantity <= stock_quantity
+
+    errors.add(:reserved_quantity, "ต้องไม่เกินจำนวนสต็อก")
   end
 end

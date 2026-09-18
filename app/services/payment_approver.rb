@@ -15,12 +15,7 @@ class PaymentApprover
     raise Error, "อนุมัติไม่ได้ในสถานะนี้" unless approvable
 
     Order.transaction do
-      payment.order.order_items.includes(:product_variant).each do |item|
-        variant = item.product_variant
-        raise Error, "#{variant.product.name} สต็อกไม่พอ" if variant.stock_quantity < item.quantity
-
-        variant.decrement!(:stock_quantity, item.quantity)
-      end
+      StockReservation.fulfill!(payment.order.order_items.includes(:product_variant))
 
       payment.update!(status: :approved, admin_note: admin_note)
       payment.order.update!(status: :paid)

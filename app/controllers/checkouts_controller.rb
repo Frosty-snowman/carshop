@@ -9,9 +9,10 @@ class CheckoutsController < ApplicationController
 
   def create
     order = CheckoutCreator.call(user: current_user, params: checkout_params)
-    redirect_to order_path(order), notice: "สร้างคำสั่งซื้อแล้ว กรุณาแนบสลิปเพื่อชำระเงิน"
-  rescue CheckoutCreator::Error => e
-    redirect_to cart_items_path, alert: e.message
+    redirect_to order_path(order, pay: 1),
+      notice: "จองสต็อกแล้ว! โอนเงินและแนบสลิปด้านล่างภายใน #{Order::PAYMENT_WINDOW_MINUTES} นาที"
+  rescue CheckoutCreator::Error, ShippingFeeCalculator::Error => e
+    redirect_to new_checkout_path, alert: e.message
   end
 
   private
@@ -23,6 +24,6 @@ class CheckoutsController < ApplicationController
   end
 
   def checkout_params
-    params.require(:checkout).permit(:recipient_name, :phone, :address, :payment_method)
+    params.require(:checkout).permit(:recipient_name, :phone, :address, :postal_code, :payment_method)
   end
 end

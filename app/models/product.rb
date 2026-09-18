@@ -5,10 +5,14 @@ class Product < ApplicationRecord
 
   validates :name, presence: true
 
-  scope :in_stock, -> { joins(:product_variants).where("product_variants.stock_quantity > 0").distinct }
+  scope :in_stock, -> {
+    joins(:product_variants)
+      .where("product_variants.stock_quantity > product_variants.reserved_quantity")
+      .distinct
+  }
 
   def available_variants
-    product_variants.where("stock_quantity > 0")
+    product_variants.where("stock_quantity > reserved_quantity")
   end
 
   def min_price

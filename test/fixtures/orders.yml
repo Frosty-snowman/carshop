@@ -1,7 +1,11 @@
 paid_order:
   user: customer
   status: 2
-  total_amount: 500.00
+  subtotal_amount: 500.00
+  shipping_fee: 50.00
+  total_amount: 550.00
+  postal_code: "10110"
+  shipping_zone: standard
   recipient_name: Test Customer
   phone: "0812345678"
   address: "123 Test St"
@@ -9,7 +13,11 @@ paid_order:
 shipped_order:
   user: customer
   status: 3
-  total_amount: 300.00
+  subtotal_amount: 300.00
+  shipping_fee: 50.00
+  total_amount: 350.00
+  postal_code: "10110"
+  shipping_zone: standard
   recipient_name: Test Customer
   phone: "0812345678"
   address: "123 Test St"
@@ -20,7 +28,38 @@ shipped_order:
 submitted_order:
   user: customer
   status: 1
-  total_amount: 500.00
+  subtotal_amount: 500.00
+  shipping_fee: 50.00
+  total_amount: 550.00
+  postal_code: "10110"
+  shipping_zone: standard
+  payment_deadline_at: <%= 10.minutes.from_now %>
+  recipient_name: Test Customer
+  phone: "0812345678"
+  address: "123 Test St"
+
+pending_order:
+  user: customer
+  status: 0
+  subtotal_amount: 500.00
+  shipping_fee: 50.00
+  total_amount: 550.00
+  postal_code: "10110"
+  shipping_zone: standard
+  payment_deadline_at: <%= 10.minutes.from_now %>
+  recipient_name: Test Customer
+  phone: "0812345678"
+  address: "123 Test St"
+
+expired_order:
+  user: customer
+  status: 0
+  subtotal_amount: 300.00
+  shipping_fee: 50.00
+  total_amount: 350.00
+  postal_code: "10110"
+  shipping_zone: standard
+  payment_deadline_at: <%= 1.minute.ago %>
   recipient_name: Test Customer
   phone: "0812345678"
   address: "123 Test St"

@@ -24,4 +24,26 @@ module ApplicationHelper
       "cancelled" => "bg-gray-100 text-gray-600"
     }[status] || "bg-gray-100 text-gray-800"
   end
+
+  def order_status_pill_class(status)
+    {
+      "pending_payment" => "bg-amber-500/20 text-amber-300 border-amber-500/30",
+      "payment_submitted" => "bg-blue-500/20 text-blue-300 border-blue-500/30",
+      "paid" => "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+      "shipped" => "bg-violet-500/20 text-violet-300 border-violet-500/30",
+      "completed" => "bg-white/10 text-white/50 border-white/20",
+      "payment_rejected" => "bg-red-500/20 text-red-300 border-red-500/30",
+      "cancelled" => "bg-red-500/10 text-red-400/70 border-red-500/20"
+    }[status] || "bg-white/10 text-white/50 border-white/20"
+  end
+
+  def order_action_hint(order)
+    return "โอนเงินและแนบสลิป →" if order.pending_payment?
+    return "แนบสลิปใหม่ →" if order.payment_rejected? && order.can_upload_slip?
+    return "รอร้านตรวจสอบสลิป" if order.payment_submitted?
+    return "ติดตามพัสดุ →" if order.shipped?
+    return "ดูรายละเอียด →" if order.paid? || order.completed?
+
+    "ดูรายละเอียด →"
+  end
 end

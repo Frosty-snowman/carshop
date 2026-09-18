@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   resources :products, only: %i[index show]
   resources :cart_items, only: %i[index create update destroy]
   resource :checkout, only: %i[new create]
+  resources :feature_requests, only: %i[new create]
   resources :orders, only: %i[index show]
   resources :orders, only: [] do
     resource :payment, only: %i[update]
@@ -25,6 +26,7 @@ Rails.application.routes.draw do
       end
     end
     resources :orders, only: %i[index show update]
+    resources :feature_requests, only: %i[index update]
     resources :payments, only: [] do
       member do
         post :approve

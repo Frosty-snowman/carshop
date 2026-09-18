@@ -21,10 +21,31 @@ class Order < ApplicationRecord
     "thailand_post" => "https://track.thailandpost.co.th/?trackNumber="
   }.freeze
 
+  PAYMENT_WINDOW_MINUTES = 5
+
   validates :recipient_name, :phone, :address, presence: true
+  validates :postal_code, format: { with: /\A\d{5}\z/, message: "ต้องเป็น 5 หลัก" }, allow_blank: true
   validates :tracking_number, :shipping_carrier, presence: true, if: :shipped?
 
   scope :recent, -> { order(created_at: :desc) }
+
+  def expire_if_needed!
+    OrderExpirer.expire!(self)
+  end
+
+  def payment_expired?
+    pending_payment? && payment_deadline_at.present? && payment_deadline_at <= Time.current
+  end
+
+  def payment_time_remaining
+    return 0.seconds if payment_deadline_at.blank?
+
+    [ payment_deadline_at - Time.current, 0.seconds ].max
+  end
+
+  def shipping_zone_label
+    ShippingFeeCalculator.zone_label(shipping_zone)
+  end
 
   def status_label
     {
@@ -58,7 +79,11 @@ class Order < ApplicationRecord
   end
 
   def can_upload_slip?
-    pending_payment? || payment_rejected?
+    return false if cancelled?
+    return false unless pending_payment? || payment_rejected?
+    return true if payment_deadline_at.blank?
+
+    payment_deadline_at > Time.current
   end
 
   def awaiting_admin_review?

@@ -1,0 +1,147 @@
+<%# แสดงเมื่อรอโอน/แนบสลิป — เน้นให้ user เห็นชัด %>
+<div id="upload-slip"
+     class="relative mb-8 rounded-3xl border-2 border-amber-400/70 bg-gradient-to-br from-amber-500/25 via-violet-600/15 to-indigo-900/40 p-6 md:p-10 shadow-[0_0_80px_-20px_rgba(251,191,36,0.55)] animate-pulse-glow overflow-hidden"
+     <% if local_assigns[:scroll_here] %>data-controller="scroll-into-view"<% end %>>
+  <div class="absolute top-0 right-0 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+
+  <div class="relative">
+    <div class="flex flex-wrap items-start justify-between gap-4 mb-8">
+      <div>
+        <p class="inline-flex items-center gap-2 rounded-full bg-amber-400/20 border border-amber-400/40 px-4 py-1.5 text-sm font-semibold text-amber-200 mb-4">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+          </span>
+          รอคุณโอนเงิน — ทำตาม 2 ขั้นตอนนี้
+        </p>
+        <h2 class="text-2xl md:text-3xl font-bold text-white leading-tight">
+          โอนเงินแล้วแนบสลิป<br>
+          <span class="text-amber-300">เพื่อยืนยันคำสั่งซื้อ</span>
+        </h2>
+      </div>
+
+      <% if order.payment_deadline_at.present? %>
+        <div class="rounded-2xl bg-black/30 border border-amber-500/30 px-5 py-4 text-center min-w-[140px]"
+             data-controller="payment-countdown"
+             data-payment-countdown-deadline-value="<%= order.payment_deadline_at.iso8601 %>"
+             data-payment-countdown-expired-url-value="<%= order_path(order) %>">
+          <p class="text-xs text-amber-300/80 uppercase tracking-wide">เหลือเวลา</p>
+          <p class="text-3xl font-mono font-bold text-amber-300 mt-1" data-payment-countdown-target="display">--:--</p>
+          <div class="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
+            <div class="h-full bg-amber-400 rounded-full transition-all duration-1000" data-payment-countdown-target="bar" style="width: 100%"></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <%# 3 ขั้นตอน %>
+    <div class="grid md:grid-cols-3 gap-4 mb-8">
+      <div class="rounded-2xl bg-white/5 border border-white/10 p-4 md:p-5">
+        <div class="w-8 h-8 rounded-full bg-amber-400 text-black font-bold flex items-center justify-center text-sm mb-3">1</div>
+        <p class="font-semibold text-white mb-1">โอนเงิน</p>
+        <p class="text-sm text-white/50">โอนยอดด้านล่างให้ครบ</p>
+      </div>
+      <div class="rounded-2xl bg-white/5 border border-amber-400/40 p-4 md:p-5 ring-1 ring-amber-400/20">
+        <div class="w-8 h-8 rounded-full bg-violet-500 text-white font-bold flex items-center justify-center text-sm mb-3">2</div>
+        <p class="font-semibold text-white mb-1">แนบสลิป</p>
+        <p class="text-sm text-white/50">อัปโหลดรูปสลิปในช่องด้านล่าง</p>
+      </div>
+      <div class="rounded-2xl bg-white/5 border border-white/10 p-4 md:p-5 opacity-60">
+        <div class="w-8 h-8 rounded-full bg-white/20 text-white/60 font-bold flex items-center justify-center text-sm mb-3">3</div>
+        <p class="font-semibold text-white/70 mb-1">รอตรวจสอบ</p>
+        <p class="text-sm text-white/40">ร้านจะตรวจสลิปให้</p>
+      </div>
+    </div>
+
+    <%# ยอดโอน — ใหญ่มาก %>
+    <div class="rounded-2xl bg-black/40 border-2 border-amber-400/50 p-6 mb-6 text-center">
+      <p class="text-sm text-amber-200/80 uppercase tracking-widest mb-2">ยอดที่ต้องโอน</p>
+      <p class="text-4xl md:text-5xl font-bold text-amber-300 tracking-tight"><%= format_baht(order.total_amount) %></p>
+      <p class="text-xs text-white/40 mt-2">รวมสินค้า + ค่าส่งแล้ว</p>
+    </div>
+
+    <%# ข้อมูลโอน %>
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <% if order.payment.bank_transfer? %>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-5">
+          <p class="text-xs text-white/40 uppercase tracking-wide mb-3">โอนบัญชีธนาคาร</p>
+          <p class="text-lg font-semibold text-white"><%= shop_setting.bank_name %></p>
+          <p class="text-2xl font-mono font-bold text-white mt-2 tracking-wide"><%= shop_setting.account_number %></p>
+          <p class="text-sm text-white/50 mt-1"><%= shop_setting.account_name %></p>
+        </div>
+      <% else %>
+        <div class="rounded-2xl bg-white/5 border border-white/10 p-5 flex flex-col items-center justify-center">
+          <p class="text-xs text-white/40 uppercase tracking-wide mb-3">สแกน QR Code</p>
+          <% if shop_setting.qr_code.attached? %>
+            <%= image_tag shop_setting.qr_code, class: "max-w-[200px] rounded-xl border border-white/20" %>
+          <% else %>
+            <p class="text-white/40 text-sm">ติดต่อร้านเพื่อขอ QR</p>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="rounded-2xl bg-violet-500/10 border border-violet-400/30 p-5 flex flex-col justify-center">
+        <p class="text-violet-200 font-semibold mb-2">📎 แนบสลิปที่นี่ ↓</p>
+        <p class="text-sm text-white/50">เลื่อนลงอีกนิด แล้วกดเลือกไฟล์สลิปจากมือถือหรือคอมพิวเตอร์</p>
+        <% if order.payment_rejected? %>
+          <p class="text-sm text-red-300 mt-3 font-medium">⚠ สลิปครั้งก่อนไม่ผ่าน — โปรดแนบใหม่</p>
+        <% end %>
+      </div>
+    </div>
+
+    <%# ฟอร์มแนบสลิป %>
+    <div class="rounded-2xl bg-white/10 border-2 border-dashed border-violet-400/60 p-6 md:p-8"
+         data-controller="slip-preview">
+      <h3 class="text-xl font-bold text-white mb-1 flex items-center gap-2">
+        <span class="text-2xl">📤</span> อัปโหลดสลิปโอนเงิน
+      </h3>
+      <p class="text-sm text-white/50 mb-6">รองรับ JPG, PNG, PDF — ต้องแนบก่อนหมดเวลา</p>
+
+      <%= form_with model: order.payment, url: order_payment_path(order), method: :patch,
+          html: { multipart: true, class: "space-y-5" } do |f| %>
+        <div class="rounded-xl bg-black/30 p-4 border border-white/10">
+          <p class="text-sm mb-3 text-white/60">วิธีชำระที่ใช้</p>
+          <label class="flex items-center gap-2 mb-2 text-white/80 cursor-pointer">
+            <%= f.radio_button :method, "bank_transfer", checked: order.payment.bank_transfer?, class: "accent-amber-400 w-4 h-4" %>
+            โอนบัญชีธนาคาร
+          </label>
+          <label class="flex items-center gap-2 text-white/80 cursor-pointer">
+            <%= f.radio_button :method, "qr", checked: order.payment.qr?, class: "accent-amber-400 w-4 h-4" %>
+            QR Code
+          </label>
+        </div>
+
+        <div>
+          <%= f.label :slip, "เลือกไฟล์สลิป", class: "block text-base font-semibold text-amber-200 mb-3" %>
+          <%= f.file_field :slip, required: true,
+              accept: "image/jpeg,image/png,image/webp,application/pdf",
+              class: "block w-full text-white/70 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:bg-violet-600 file:text-white file:font-semibold file:cursor-pointer hover:file:bg-violet-500",
+              data: { slip_preview_target: "input", action: "change->slip-preview#preview" } %>
+
+          <div class="mt-4 rounded-2xl border border-dashed border-emerald-400/40 bg-emerald-500/10 p-4 hidden"
+               data-slip-preview-target="preview">
+            <p class="text-sm font-semibold text-emerald-300 mb-3 flex items-center gap-2">
+              <span>✅</span> เลือกไฟล์แล้ว — ตรวจสอบก่อนกดส่ง
+            </p>
+            <img data-slip-preview-target="image" alt="ตัวอย่างสลิป"
+                 class="hidden max-w-full max-h-80 mx-auto rounded-xl border-2 border-emerald-400/30 shadow-lg object-contain">
+            <div data-slip-preview-target="pdfNotice"
+                 class="hidden text-center py-8 rounded-xl bg-black/20 border border-white/10">
+              <span class="text-5xl">📄</span>
+              <p class="text-white/70 mt-3 font-medium">ไฟล์ PDF พร้อมส่ง</p>
+            </div>
+            <p class="text-xs text-white/40 mt-3 text-center truncate" data-slip-preview-target="filename"></p>
+          </div>
+
+          <p class="text-sm text-white/30 text-center py-6 rounded-xl border border-white/5 mt-4"
+             data-slip-preview-target="placeholder">
+            ยังไม่ได้เลือกไฟล์ — กดปุ่มด้านบนเพื่อเลือกรูปสลิป
+          </p>
+        </div>
+
+        <%= f.submit "✅ ส่งสลิปยืนยันการชำระเงิน",
+            class: "w-full !py-4 !text-lg btn-primary font-bold shadow-lg shadow-violet-900/50 hover:scale-[1.01] transition-transform cursor-pointer" %>
+      <% end %>
+    </div>
+  </div>
+</div>

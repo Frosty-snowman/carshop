@@ -1,4 +1,16 @@
 th:
+  date:
+    formats:
+      default: "%d/%m/%Y"
+      short: "%d %b"
+      long: "%d %B %Y"
+    month_names: [~, มกราคม, กุมภาพันธ์, มีนาคม, เมษายน, พฤษภาคม, มิถุนายน, กรกฎาคม, สิงหาคม, กันยายน, ตุลาคม, พฤศจิกายน, ธันวาคม]
+    abbr_month_names: [~, ม.ค., ก.พ., มี.ค., เม.ย., พ.ค., มิ.ย., ก.ค., ส.ค., ก.ย., ต.ค., พ.ย., ธ.ค.]
+  time:
+    formats:
+      default: "%d/%m/%Y %H:%M น."
+      short: "%d %b %H:%M น."
+      long: "%d %B %Y %H:%M น."
   errors:
     messages:
       blank: "ต้องกรอก"

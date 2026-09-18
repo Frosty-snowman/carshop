@@ -15,3 +15,15 @@ submitted_item:
   product_variant: pikachu_new_th
   quantity: 1
   unit_price: 500.00
+
+pending_item:
+  order: pending_order
+  product_variant: blue_eyes_new_en
+  quantity: 1
+  unit_price: 300.00
+
+expired_item:
+  order: expired_order
+  product_variant: blue_eyes_new_en
+  quantity: 1
+  unit_price: 300.00

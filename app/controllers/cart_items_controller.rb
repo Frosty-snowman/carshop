@@ -10,8 +10,8 @@ class CartItemsController < ApplicationController
     item = current_user.cart_items.find_or_initialize_by(product_variant: variant)
     item.quantity = item.persisted? ? item.quantity + quantity_param : quantity_param
 
-    if item.quantity > variant.stock_quantity
-      redirect_to product_path(variant.product), alert: "สต็อกไม่พอ (เหลือ #{variant.stock_quantity} ใบ)"
+    if item.quantity > variant.available_quantity
+      redirect_to product_path(variant.product), alert: "สต็อกไม่พอ (เหลือ #{variant.available_quantity} ใบ)"
     elsif item.save
       redirect_to cart_items_path, notice: "เพิ่มลงตะกร้าแล้ว"
     else
