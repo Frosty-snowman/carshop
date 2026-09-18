@@ -9,6 +9,10 @@ module ApplicationHelper
     "One Piece" => { emoji: "🏴‍☠️", gradient: "from-red-500/20 to-orange-600/20", border: "border-red-500/30", text: "text-red-400" }
   }.freeze
 
+  def products_filter_params(overrides = {})
+    params.permit(:category_id, :stock, :sort).to_h.symbolize_keys.merge(overrides).compact_blank
+  end
+
   def category_style(category)
     CATEGORY_STYLES.fetch(category.name, { emoji: "🃏", gradient: "from-violet-500/20 to-purple-600/20", border: "border-violet-500/30", text: "text-violet-400" })
   end

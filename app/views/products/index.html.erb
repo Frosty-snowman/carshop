@@ -3,16 +3,42 @@
   <p class="text-white/40">เลือกการ์ดที่ต้องการจากหมวดหมู่ด้านล่าง</p>
 </div>
 
-<div class="flex flex-wrap gap-2 mb-10 animate-fade-in-up" style="animation-delay: 0.1s">
-  <%= link_to "ทั้งหมด", products_path,
+<div class="flex flex-wrap gap-2 mb-6 animate-fade-in-up" style="animation-delay: 0.1s">
+  <%= link_to "ทั้งหมด", products_path(products_filter_params.except(:category_id)),
       class: "category-pill #{params[:category_id].blank? ? 'category-pill-active' : ''}" %>
   <% @categories.each do |category| %>
     <% style = category_style(category) %>
-    <%= link_to products_path(category_id: category.id),
+    <%= link_to products_path(products_filter_params(category_id: category.id)),
         class: "category-pill #{params[:category_id].to_s == category.id.to_s ? 'category-pill-active' : ''}" do %>
       <%= style[:emoji] %> <%= category.name %>
     <% end %>
   <% end %>
+</div>
+
+<div class="flex flex-wrap items-center gap-4 mb-10 animate-fade-in-up" style="animation-delay: 0.12s">
+  <div class="flex flex-wrap gap-2">
+    <span class="text-xs text-white/30 self-center mr-1">สต็อก</span>
+    <% [
+      ["ทั้งหมด", nil],
+      ["มีสต็อก", "in_stock"],
+      ["หมดสต็อก", "out_of_stock"]
+    ].each do |label, value| %>
+      <%= link_to label, products_path(products_filter_params(stock: value)),
+          class: "category-pill text-xs !py-2 !px-4 #{params[:stock].to_s == value.to_s ? 'category-pill-active' : ''}" %>
+    <% end %>
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    <span class="text-xs text-white/30 self-center mr-1">เรียง</span>
+    <% [
+      ["ใหม่ล่าสุด", nil],
+      ["ราคาต่ำ → สูง", "price_asc"],
+      ["ราคาสูง → ต่ำ", "price_desc"]
+    ].each do |label, value| %>
+      <%= link_to label, products_path(products_filter_params(sort: value)),
+          class: "category-pill text-xs !py-2 !px-4 #{params[:sort].to_s == value.to_s ? 'category-pill-active' : ''}" %>
+    <% end %>
+  </div>
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -24,7 +50,7 @@
 <% if @products.empty? %>
   <div class="glass rounded-2xl p-12 text-center animate-fade-in">
     <span class="text-4xl mb-4 block opacity-30">🔍</span>
-    <p class="text-white/40">ไม่พบการ์ดในหมวดหมู่นี้</p>
+    <p class="text-white/40">ไม่พบการ์ดที่ตรงเงื่อนไข</p>
     <%= link_to "ดูทั้งหมด", products_path, class: "btn-secondary mt-4 inline-flex" %>
   </div>
 <% end %>

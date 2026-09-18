@@ -1,35 +1,61 @@
 <% style = category_style(product.category) %>
+<% sold_out = !product.in_stock? %>
+<% low_stock = product.low_stock? %>
+<% available = product.total_available_stock %>
 <%= link_to product_path(product),
-    class: "product-card block animate-fade-in-up",
+    class: "product-card block animate-fade-in-up #{'product-card--sold-out' if sold_out}",
     style: ("animation-delay: #{0.05 * (local_assigns[:index] || 0)}s" if local_assigns[:index]) do %>
   <div class="aspect-[3/4] bg-gradient-to-br from-white/5 to-white/[0.02] flex items-center justify-center overflow-hidden relative">
     <% if product.image.attached? %>
-      <%= image_tag product.image, class: "w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" %>
+      <%= image_tag product.image, class: "product-card__image w-full h-full object-cover transition-transform duration-700" %>
     <% else %>
-      <div class="flex flex-col items-center gap-2 text-white/20">
+      <div class="product-card__image flex flex-col items-center gap-2 text-white/20">
         <span class="text-5xl"><%= style[:emoji] %></span>
         <span class="text-xs">No image</span>
       </div>
     <% end %>
-    <div class="absolute top-3 left-3">
-      <span class="text-xs font-medium px-2.5 py-1 rounded-full glass #{style[:text]}">
+
+    <div class="absolute top-3 left-3 z-10">
+      <span class="text-xs font-medium px-2.5 py-1 rounded-full glass <%= style[:text] %>">
         <%= style[:emoji] %> <%= product.category.name %>
       </span>
     </div>
+
+    <% if low_stock %>
+      <div class="absolute top-3 right-3 z-10">
+        <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/90 text-amber-950 shadow-lg">
+          เหลือ <%= available %> ใบ
+        </span>
+      </div>
+    <% end %>
+
+    <% if sold_out %>
+      <div class="absolute inset-0 z-10 flex items-center justify-center bg-black/40">
+        <span class="text-sm font-bold px-4 py-2 rounded-full bg-red-500/90 text-white shadow-lg tracking-wide">
+          หมดสต็อก
+        </span>
+      </div>
+    <% end %>
   </div>
+
   <div class="p-4">
-    <h3 class="font-semibold text-white truncate"><%= product.name %></h3>
+    <h3 class="font-semibold truncate <%= sold_out ? 'text-white/50' : 'text-white' %>"><%= product.name %></h3>
     <% if product.min_price %>
       <p class="mt-2 flex items-baseline gap-1">
         <span class="text-xs text-white/40">เริ่มต้น</span>
-        <span class="text-lg font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent">
+        <span class="text-lg font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent <%= 'opacity-50' if sold_out %>">
           <%= format_baht(product.min_price) %>
         </span>
       </p>
     <% end %>
-    <% total_stock = product.product_variants.sum(:stock_quantity) %>
-    <p class="text-xs text-white/30 mt-2">
-      <%= total_stock > 0 ? "มี #{total_stock} ใบ" : "หมดสต็อก" %>
+    <p class="text-xs mt-2 <%= sold_out ? 'text-red-400/80' : low_stock ? 'text-amber-400/80' : 'text-white/30' %>">
+      <% if sold_out %>
+        หมดสต็อก
+      <% elsif low_stock %>
+        เหลือน้อย — <%= available %> ใบ
+      <% else %>
+        มี <%= available %> ใบ
+      <% end %>
     </p>
   </div>
 <% end %>
