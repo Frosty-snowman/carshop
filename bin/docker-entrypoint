@@ -2,12 +2,12 @@
 
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   if [ -z "$SECRET_KEY_BASE" ] && [ -z "$RAILS_MASTER_KEY" ]; then
-    echo "FATAL: Set SECRET_KEY_BASE or RAILS_MASTER_KEY in Railway Variables"
+    echo "FATAL: Set SECRET_KEY_BASE or RAILS_MASTER_KEY in environment variables"
     exit 1
   fi
 
   if [ -z "$DATABASE_URL" ]; then
-    echo "FATAL: DATABASE_URL not set — add PostgreSQL plugin and link it to this service"
+    echo "FATAL: DATABASE_URL not set — link a PostgreSQL database to this service"
     exit 1
   fi
 

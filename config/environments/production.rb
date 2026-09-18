@@ -83,13 +83,10 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
-  # Render / Railway auto-domain or custom APP_HOST
+  # Render auto-domain or custom APP_HOST
   config.hosts << ENV["RENDER_EXTERNAL_HOSTNAME"] if ENV["RENDER_EXTERNAL_HOSTNAME"].present?
-  config.hosts << ENV["RAILWAY_PUBLIC_DOMAIN"] if ENV["RAILWAY_PUBLIC_DOMAIN"].present?
   config.hosts << ENV["APP_HOST"] if ENV["APP_HOST"].present?
   config.hosts << /.*\.onrender\.com/
-  config.hosts << /.*\.railway\.app/
-  config.hosts << /.*\.up\.railway\.app/
 
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end

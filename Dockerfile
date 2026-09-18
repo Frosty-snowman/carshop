@@ -72,6 +72,6 @@ COPY --chown=rails:rails --from=build /rails /rails
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Railway sets PORT at runtime; Puma reads it from config/puma.rb
+# PORT is set at runtime; Puma reads it from config/puma.rb
 EXPOSE 3000
 CMD ["./bin/rails", "server", "-b", "0.0.0.0"]
