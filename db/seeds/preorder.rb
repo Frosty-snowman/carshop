@@ -70,7 +70,7 @@ preorder_products = [
         is_preorder: true,
         preorder_release_date: Date.new(2027, 2, 28),
         preorder_quota: 20,
-        preorder_reserved: 18,
+        preorder_reserved: 16,
         preorder_closes_at: nil,
         state: :nearly_full
       }
