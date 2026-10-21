@@ -119,18 +119,23 @@ class CheckoutCreatorTest < ActiveSupport::TestCase
   end
 
   test "raises error when preorder quota exceeded" do
+    # Start with quota that will become insufficient due to other orders
     @variant.update!(
       is_preorder: true,
       preorder_quota: 10,
-      preorder_reserved: 8,
+      preorder_reserved: 0,
       preorder_release_date: 1.month.from_now
     )
-    @customer.cart_items.first.update!(quantity: 5)
+    
+    # Customer adds 3 items to cart (this is fine, 3 < 10)
+    @customer.cart_items.first.update!(quantity: 3)
+    
+    # Simulate other customers reserving most of the quota
+    # (e.g., between adding to cart and checking out)
+    @variant.update!(preorder_reserved: 8)
+    # Now available is only 2, but cart has 3
 
-    # Should raise error because available quota (2) < requested quantity (5)
-    # Either CheckoutCreator::Error or ActiveRecord::RecordInvalid is acceptable
-    error_raised = false
-    begin
+    error = assert_raises(CheckoutCreator::Error) do
       CheckoutCreator.call(
         user: @customer,
         params: {
@@ -142,10 +147,8 @@ class CheckoutCreatorTest < ActiveSupport::TestCase
           preorder_acknowledged: "1"
         }
       )
-    rescue CheckoutCreator::Error, ActiveRecord::RecordInvalid
-      error_raised = true
     end
     
-    assert error_raised, "Expected an error to be raised when preorder quota is exceeded"
+    assert_match(/โควต้าพรีออเดอร์ไม่พอ/, error.message)
   end
 end

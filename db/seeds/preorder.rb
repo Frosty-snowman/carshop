@@ -199,9 +199,9 @@ variant2 = created_variants[:nearly_full]
 
 order2 = user2.orders.create!(
   status: :paid,
-  subtotal_amount: variant2.price * 3,
+  subtotal_amount: variant2.price * 2,
   shipping_fee: 50,
-  total_amount: variant2.price * 3 + 50,
+  total_amount: variant2.price * 2 + 50,
   postal_code: "10110",
   shipping_zone: "standard",
   payment_deadline_at: 5.minutes.ago,
@@ -212,13 +212,13 @@ order2 = user2.orders.create!(
 
 order2.order_items.create!(
   product_variant: variant2,
-  quantity: 3,
+  quantity: 2,
   unit_price: variant2.price,
   is_preorder: true,
   preorder_status: :pending_fulfillment
 )
 
-variant2.increment!(:preorder_reserved, 3)
+variant2.increment!(:preorder_reserved, 2)
 order2.create_payment!(method: :bank_transfer, status: :approved, admin_note: "อนุมัติโดย seed script")
 puts "  ✓ Order ##{order2.id} - ชำระแล้ว รอสินค้าวางจำหน่าย (#{user2.name})"
 
