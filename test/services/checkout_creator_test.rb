@@ -47,4 +47,108 @@ class CheckoutCreatorTest < ActiveSupport::TestCase
       )
     end
   end
+
+  test "creates preorder order item when variant is preorder" do
+    @variant.update!(
+      is_preorder: true,
+      preorder_quota: 20,
+      preorder_reserved: 0,
+      preorder_release_date: 1.month.from_now
+    )
+
+    order = CheckoutCreator.call(
+      user: @customer,
+      params: {
+        recipient_name: "Test",
+        phone: "0812345678",
+        address: "123 Road",
+        postal_code: "10110",
+        payment_method: "bank_transfer",
+        preorder_acknowledged: "1"
+      }
+    )
+
+    order_item = order.order_items.first
+    assert order_item.is_preorder?
+    assert_equal "pending_fulfillment", order_item.preorder_status
+  end
+
+  test "reserves preorder quota for preorder items" do
+    @variant.update!(
+      is_preorder: true,
+      preorder_quota: 20,
+      preorder_reserved: 5,
+      preorder_release_date: 1.month.from_now
+    )
+
+    CheckoutCreator.call(
+      user: @customer,
+      params: {
+        recipient_name: "Test",
+        phone: "0812345678",
+        address: "123 Road",
+        postal_code: "10110",
+        payment_method: "bank_transfer",
+        preorder_acknowledged: "1"
+      }
+    )
+
+    assert_equal 6, @variant.reload.preorder_reserved
+  end
+
+  test "raises error when preorder not acknowledged" do
+    @variant.update!(
+      is_preorder: true,
+      preorder_quota: 20,
+      preorder_reserved: 0,
+      preorder_release_date: 1.month.from_now
+    )
+
+    assert_raises(CheckoutCreator::Error) do
+      CheckoutCreator.call(
+        user: @customer,
+        params: {
+          recipient_name: "Test",
+          phone: "0812345678",
+          address: "123 Road",
+          postal_code: "10110",
+          payment_method: "bank_transfer"
+        }
+      )
+    end
+  end
+
+  test "raises error when preorder quota exceeded" do
+    # Start with quota that will become insufficient due to other orders
+    @variant.update!(
+      is_preorder: true,
+      preorder_quota: 10,
+      preorder_reserved: 0,
+      preorder_release_date: 1.month.from_now
+    )
+    
+    # Customer adds 3 items to cart (this is fine, 3 < 10)
+    @customer.cart_items.first.update!(quantity: 3)
+    
+    # Simulate other customers reserving most of the quota
+    # (e.g., between adding to cart and checking out)
+    @variant.update!(preorder_reserved: 8)
+    # Now available is only 2, but cart has 3
+
+    error = assert_raises(CheckoutCreator::Error) do
+      CheckoutCreator.call(
+        user: @customer,
+        params: {
+          recipient_name: "Test",
+          phone: "0812345678",
+          address: "123 Road",
+          postal_code: "10110",
+          payment_method: "bank_transfer",
+          preorder_acknowledged: "1"
+        }
+      )
+    end
+    
+    assert_match(/โควต้าพรีออเดอร์ไม่พอ/, error.message)
+  end
 end

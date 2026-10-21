@@ -26,6 +26,7 @@ Rails.application.routes.draw do
       end
     end
     resources :orders, only: %i[index show update]
+    resources :order_items, only: %i[update]
     resources :feature_requests, only: %i[index update]
     resources :payments, only: [] do
       member do

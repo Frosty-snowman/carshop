@@ -50,3 +50,6 @@ end
 
 puts "Seed complete!"
 puts "Admin login: #{admin_email} / #{admin_password}"
+
+# Load pre-order seed data
+load Rails.root.join("db", "seeds", "preorder.rb")

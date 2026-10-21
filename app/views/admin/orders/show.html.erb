@@ -113,9 +113,39 @@
     <div class="admin-card p-6 animate-fade-in-up" style="animation-delay: 0.1s">
       <h2 class="font-semibold mb-3 text-slate-800">รายการ</h2>
       <% @order.order_items.each do |item| %>
-        <div class="flex justify-between text-sm py-2 border-b border-slate-50 last:border-0">
-          <span class="text-slate-600"><%= item.product_variant.product.name %> (<%= item.product_variant.display_label %>) × <%= item.quantity %></span>
-          <span class="text-slate-800 font-medium"><%= format_baht(item.subtotal) %></span>
+        <div class="py-3 border-b border-slate-50 last:border-0">
+          <div class="flex justify-between text-sm">
+            <span class="text-slate-600">
+              <%= item.product_variant.product.name %> (<%= item.product_variant.display_label %>) × <%= item.quantity %>
+              <% if item.is_preorder? %>
+                <span class="text-xs font-semibold ml-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-200">
+                  พรีออเดอร์
+                </span>
+              <% end %>
+            </span>
+            <span class="text-slate-800 font-medium"><%= format_baht(item.subtotal) %></span>
+          </div>
+          <% if item.is_preorder? %>
+            <div class="mt-2 text-xs space-y-1">
+              <p class="text-slate-500">
+                สถานะ: 
+                <span class="<%= item.preorder_refund_needed? ? 'text-red-600 font-medium' : 'text-slate-600' %>">
+                  <%= item.preorder_status_label %>
+                </span>
+              </p>
+              <% if item.product_variant.preorder_release_date.present? %>
+                <p class="text-slate-500">วางจำหน่าย: <%= l(item.product_variant.preorder_release_date, format: :long) %></p>
+              <% end %>
+              <% if @order.paid? && !item.preorder_refund_needed? %>
+                <%= form_with url: admin_order_item_path(item), method: :patch, class: "mt-2" do |f| %>
+                  <%= hidden_field_tag :preorder_status, 'refund_needed' %>
+                  <%= submit_tag "❌ ต้องคืนเงิน", 
+                      data: { confirm: "ยืนยันว่าสินค้านี้ต้องคืนเงินให้ลูกค้า?" },
+                      class: "text-xs rounded-lg border border-red-200 text-red-600 px-2 py-1 font-medium hover:bg-red-50 transition-colors cursor-pointer" %>
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
         </div>
       <% end %>
       <div class="flex justify-between text-sm py-2 mt-2 text-slate-500">
