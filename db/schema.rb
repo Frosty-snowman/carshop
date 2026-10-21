@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_18_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_21_064000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -75,7 +75,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_18_140000) do
 
   create_table "order_items", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.boolean "is_preorder", default: false, null: false
     t.bigint "order_id", null: false
+    t.integer "preorder_status", default: 0, null: false
     t.bigint "product_variant_id", null: false
     t.integer "quantity", null: false
     t.decimal "unit_price", precision: 10, scale: 2, null: false
@@ -117,7 +119,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_18_140000) do
   create_table "product_variants", force: :cascade do |t|
     t.integer "condition", default: 0, null: false
     t.datetime "created_at", null: false
+    t.boolean "is_preorder", default: false, null: false
     t.integer "language", default: 0, null: false
+    t.datetime "preorder_closes_at"
+    t.integer "preorder_quota", default: 0, null: false
+    t.date "preorder_release_date"
+    t.integer "preorder_reserved", default: 0, null: false
     t.decimal "price", precision: 10, scale: 2, null: false
     t.bigint "product_id", null: false
     t.integer "reserved_quantity", default: 0, null: false

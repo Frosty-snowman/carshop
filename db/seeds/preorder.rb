@@ -160,137 +160,153 @@ preorder_products.each do |product_data|
 end
 
 # Create sample pre-order orders in different states
-def create_preorder_order(user, variant, quantity, status, preorder_status, paid: false, submitted_payment: false)
-  # Clear any existing cart
-  user.cart_items.destroy_all
-  
-  # Create cart item
-  cart_item = user.cart_items.create!(
-    product_variant: variant,
-    quantity: quantity
-  )
-  
-  # Calculate shipping
-  shipping_fee = 50.0
-  subtotal = variant.price * quantity
-  total = subtotal + shipping_fee
-  
-  # Create order
-  order = user.orders.find_or_create_by!(
-    recipient_name: user.name,
-    phone: "081-234-5678",
-    address: "123 ถนนทดสอบ แขวงทดสอบ เขททดสอบ กรุงเทพฯ"
-  ) do |o|
-    o.status = status
-    o.subtotal_amount = subtotal
-    o.shipping_fee = shipping_fee
-    o.total_amount = total
-    o.postal_code = "10110"
-    o.shipping_zone = "standard"
-    o.payment_deadline_at = status == :pending_payment ? 5.minutes.from_now : 5.minutes.ago
-  end
-  
-  # Skip if order already has items (idempotency)
-  if order.order_items.empty?
-    # Create order item
-    order_item = order.order_items.create!(
-      product_variant: variant,
-      quantity: quantity,
-      unit_price: variant.price,
-      is_preorder: true,
-      preorder_status: preorder_status
-    )
-    
-    # Reserve quota if new order
-    if variant.is_preorder?
-      variant.increment!(:preorder_reserved, quantity)
-    end
-  end
-  
-  # Create payment
-  payment = order.payment || order.create_payment!(
-    method: :bank_transfer,
-    status: :pending
-  )
-  
-  # Update payment status if needed
-  if submitted_payment && payment.pending?
-    payment.update!(status: :submitted)
-    order.update!(status: :payment_submitted) unless order.payment_submitted?
-  end
-  
-  if paid && !order.paid?
-    payment.update!(status: :approved, admin_note: "อนุมัติโดย seed script")
-    order.update!(status: :paid)
-  end
-  
-  # Clear cart after order
-  user.cart_items.destroy_all
-  
-  order
-end
-
 puts "  Creating sample pre-order orders..."
 
 # Order 1: Pending payment with pending_fulfillment item
-order1 = create_preorder_order(
-  customer_users[0],
-  created_variants[:open_plenty],
-  2,
-  :pending_payment,
-  :pending_fulfillment,
-  paid: false
-)
-puts "  ✓ Order ##{order1.id} - รอชำระเงิน (#{customer_users[0].name})"
+user1 = customer_users[0]
+user1.cart_items.destroy_all
+variant1 = created_variants[:open_plenty]
 
-# Order 2: Payment submitted, pending review, pending_fulfillment
-order2 = create_preorder_order(
-  customer_users[1],
-  created_variants[:open_plenty],
-  1,
-  :payment_submitted,
-  :pending_fulfillment,
-  paid: false,
-  submitted_payment: true
+order1 = user1.orders.create!(
+  status: :pending_payment,
+  subtotal_amount: variant1.price * 2,
+  shipping_fee: 50,
+  total_amount: variant1.price * 2 + 50,
+  postal_code: "10110",
+  shipping_zone: "standard",
+  payment_deadline_at: 5.minutes.from_now,
+  recipient_name: user1.name,
+  phone: "081-234-5678",
+  address: "123 ถนนทดสอบ แขวงทดสอบ เขททดสอบ กรุงเทพฯ"
 )
-puts "  ✓ Order ##{order2.id} - รอตรวจสอบสลิป (#{customer_users[1].name})"
 
-# Order 3: Paid order with pending_fulfillment (waiting for release)
-order3 = create_preorder_order(
-  customer_users[2],
-  created_variants[:nearly_full],
-  3,
-  :paid,
-  :pending_fulfillment,
-  paid: true
+order1.order_items.create!(
+  product_variant: variant1,
+  quantity: 2,
+  unit_price: variant1.price,
+  is_preorder: true,
+  preorder_status: :pending_fulfillment
 )
-puts "  ✓ Order ##{order3.id} - ชำระแล้ว รอสินค้าวางจำหน่าย (#{customer_users[2].name})"
 
-# Order 4: Paid order with fulfilled item (got the product)
-order4 = create_preorder_order(
-  customer_users[0],
-  created_variants[:released],
-  1,
-  :paid,
-  :fulfilled,
-  paid: true
+variant1.increment!(:preorder_reserved, 2)
+order1.create_payment!(method: :bank_transfer, status: :pending)
+puts "  ✓ Order ##{order1.id} - รอชำระเงิน (#{user1.name})"
+
+# Order 2: Paid order with pending_fulfillment
+user2 = customer_users[1]
+user2.cart_items.destroy_all
+variant2 = created_variants[:nearly_full]
+
+order2 = user2.orders.create!(
+  status: :paid,
+  subtotal_amount: variant2.price * 3,
+  shipping_fee: 50,
+  total_amount: variant2.price * 3 + 50,
+  postal_code: "10110",
+  shipping_zone: "standard",
+  payment_deadline_at: 5.minutes.ago,
+  recipient_name: user2.name,
+  phone: "081-234-5679",
+  address: "456 ถนนทดสอบ แขวงทดสอบ เขททดสอบ กรุงเทพฯ"
 )
-# Update to fulfilled since product was released
-order4.order_items.first.update!(preorder_status: :fulfilled)
-puts "  ✓ Order ##{order4.id} - สินค้าวางจำหน่ายแล้ว ได้รับครบ (#{customer_users[0].name})"
+
+order2.order_items.create!(
+  product_variant: variant2,
+  quantity: 3,
+  unit_price: variant2.price,
+  is_preorder: true,
+  preorder_status: :pending_fulfillment
+)
+
+variant2.increment!(:preorder_reserved, 3)
+order2.create_payment!(method: :bank_transfer, status: :approved, admin_note: "อนุมัติโดย seed script")
+puts "  ✓ Order ##{order2.id} - ชำระแล้ว รอสินค้าวางจำหน่าย (#{user2.name})"
+
+# Order 3: Another paid order with pending_fulfillment
+user3 = customer_users[2]
+user3.cart_items.destroy_all
+variant3 = created_variants[:open_plenty]
+
+order3 = user3.orders.create!(
+  status: :paid,
+  subtotal_amount: variant3.price,
+  shipping_fee: 50,
+  total_amount: variant3.price + 50,
+  postal_code: "10110",
+  shipping_zone: "standard",
+  payment_deadline_at: 5.minutes.ago,
+  recipient_name: user3.name,
+  phone: "081-234-5680",
+  address: "789 ถนนทดสอบ แขวงทดสอบ เขททดสอบ กรุงเทพฯ"
+)
+
+order3.order_items.create!(
+  product_variant: variant3,
+  quantity: 1,
+  unit_price: variant3.price,
+  is_preorder: true,
+  preorder_status: :pending_fulfillment
+)
+
+variant3.increment!(:preorder_reserved, 1)
+order3.create_payment!(method: :bank_transfer, status: :approved, admin_note: "อนุมัติโดย seed script")
+puts "  ✓ Order ##{order3.id} - ชำระแล้ว รอสินค้าวางจำหน่าย (#{user3.name})"
+
+# Order 4: Paid order with fulfilled item (released product)
+variant4 = created_variants[:released]
+
+order4 = user1.orders.create!(
+  status: :paid,
+  subtotal_amount: variant4.price,
+  shipping_fee: 50,
+  total_amount: variant4.price + 50,
+  postal_code: "10110",
+  shipping_zone: "standard",
+  payment_deadline_at: 5.minutes.ago,
+  recipient_name: user1.name,
+  phone: "081-234-5678",
+  address: "123 ถนนทดสอบ แขวงทดสอบ เขททดสอบ กรุงเทพฯ"
+)
+
+order4.order_items.create!(
+  product_variant: variant4,
+  quantity: 1,
+  unit_price: variant4.price,
+  is_preorder: false,  # This was a pre-order but it's released now
+  preorder_status: :fulfilled
+)
+
+variant4.decrement!(:stock_quantity, 1)
+order4.create_payment!(method: :bank_transfer, status: :approved, admin_note: "อนุมัติโดย seed script")
+puts "  ✓ Order ##{order4.id} - สินค้าวางจำหน่ายแล้ว ได้รับครบ (#{user1.name})"
 
 # Order 5: Paid order but needs refund (allocation cut)
-order5 = create_preorder_order(
-  customer_users[1],
-  created_variants[:closed],
-  5,
-  :paid,
-  :refund_needed,
-  paid: true
+variant5 = created_variants[:closed]
+
+order5 = user2.orders.create!(
+  status: :paid,
+  subtotal_amount: variant5.price * 5,
+  shipping_fee: 50,
+  total_amount: variant5.price * 5 + 50,
+  postal_code: "10110",
+  shipping_zone: "standard",
+  payment_deadline_at: 5.minutes.ago,
+  recipient_name: user2.name,
+  phone: "081-234-5679",
+  address: "456 ถนนทดสอบ แขวงทดสอบ เขททดสอบ กรุงเทพฯ"
 )
-# Mark as needing refund
-order5.order_items.first.update!(preorder_status: :refund_needed)
-puts "  ✓ Order ##{order5.id} - ต้องคืนเงิน (ร้านได้สินค้าไม่ครบ) (#{customer_users[1].name})"
+
+order5.order_items.create!(
+  product_variant: variant5,
+  quantity: 5,
+  unit_price: variant5.price,
+  is_preorder: true,
+  preorder_status: :refund_needed
+)
+
+variant5.increment!(:preorder_reserved, 5)
+order5.create_payment!(method: :bank_transfer, status: :approved, admin_note: "อนุมัติโดย seed script")
+puts "  ✓ Order ##{order5.id} - ต้องคืนเงิน (ร้านได้สินค้าไม่ครบ) (#{user2.name})"
 
 puts ""
 puts "✅ Pre-order seed data complete!"
