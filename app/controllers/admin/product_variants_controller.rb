@@ -49,7 +49,10 @@ module Admin
     end
 
     def variant_params
-      params.require(:product_variant).permit(:condition, :language, :price, :stock_quantity)
+      params.require(:product_variant).permit(
+        :condition, :language, :price, :stock_quantity,
+        :is_preorder, :preorder_release_date, :preorder_quota, :preorder_closes_at
+      )
     end
   end
 end

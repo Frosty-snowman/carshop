@@ -21,5 +21,39 @@
     <%= f.label :stock_quantity, "จำนวนในสต็อก", class: "block text-sm mb-1" %>
     <%= f.number_field :stock_quantity, min: 0, class: "w-full rounded border px-3 py-2" %>
   </div>
+
+  <div class="border-t pt-4 mt-6">
+    <h3 class="font-semibold mb-3 text-slate-700">การตั้งค่าพรีออเดอร์</h3>
+    <div class="mb-3">
+      <label class="flex items-center gap-2">
+        <%= f.check_box :is_preorder, class: "rounded" %>
+        <span class="text-sm">เปิดรับพรีออเดอร์</span>
+      </label>
+    </div>
+    <div class="space-y-3 ml-6">
+      <div>
+        <%= f.label :preorder_release_date, "วันวางจำหน่าย", class: "block text-sm mb-1" %>
+        <%= f.date_field :preorder_release_date, class: "w-full rounded border px-3 py-2" %>
+        <p class="text-xs text-slate-500 mt-1">วันที่สินค้าจะวางจำหน่ายจริง</p>
+      </div>
+      <div>
+        <%= f.label :preorder_quota, "โควต้าพรีออเดอร์", class: "block text-sm mb-1" %>
+        <%= f.number_field :preorder_quota, min: 0, value: @variant.preorder_quota || 0, class: "w-full rounded border px-3 py-2" %>
+        <p class="text-xs text-slate-500 mt-1">จำนวนสูงสุดที่รับพรีออเดอร์</p>
+      </div>
+      <div>
+        <%= f.label :preorder_closes_at, "วันปิดรับพรีออเดอร์ (ถ้ามี)", class: "block text-sm mb-1" %>
+        <%= f.datetime_local_field :preorder_closes_at, class: "w-full rounded border px-3 py-2" %>
+        <p class="text-xs text-slate-500 mt-1">ถ้าไม่ระบุจะปิดรับเมื่อเต็มโควต้า</p>
+      </div>
+      <% unless @variant.new_record? %>
+        <div class="bg-slate-50 p-3 rounded text-sm">
+          <p><strong>จองไว้:</strong> <%= @variant.preorder_reserved || 0 %> / <%= @variant.preorder_quota || 0 %></p>
+          <p class="text-slate-600 text-xs mt-1">เหลือ: <%= (@variant.preorder_quota || 0) - (@variant.preorder_reserved || 0) %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
   <%= f.submit "บันทึก", class: "rounded-lg bg-slate-900 text-white px-6 py-2 cursor-pointer" %>
 <% end %>

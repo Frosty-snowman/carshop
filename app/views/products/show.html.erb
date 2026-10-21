@@ -28,27 +28,64 @@
         <div class="glass rounded-xl p-5 flex flex-wrap items-center justify-between gap-4 transition-all duration-300 hover:border-white/15 animate-fade-in-up"
              style="animation-delay: <%= 0.1 * i %>s">
           <div>
-            <p class="font-medium text-white"><%= variant.display_label %></p>
+            <div class="flex items-center gap-2 mb-1">
+              <p class="font-medium text-white"><%= variant.display_label %></p>
+              <% if variant.is_preorder? %>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  พรีออเดอร์
+                </span>
+              <% end %>
+            </div>
             <p class="text-xl font-bold bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent mt-1">
               <%= format_baht(variant.price) %>
             </p>
-            <p class="text-sm mt-1 <%= variant.in_stock? ? 'text-white/40' : 'text-red-400' %>">
-              <%= variant.in_stock? ? "คงเหลือ #{variant.available_quantity} ใบ" : "หมดสต็อก" %>
-            </p>
+            <% if variant.is_preorder? %>
+              <% if variant.preorder_release_date.present? %>
+                <p class="text-sm text-amber-300/80 mt-1">
+                  📅 วางจำหน่าย: <%= l(variant.preorder_release_date, format: :long) %>
+                </p>
+              <% end %>
+              <p class="text-sm mt-1 <%= variant.preorder_available? ? 'text-white/40' : 'text-red-400' %>">
+                <%= variant.preorder_available? ? "โควต้าเหลือ #{variant.available_quantity} ใบ" : "พรีออเดอร์เต็มแล้ว" %>
+              </p>
+              <% if variant.preorder_closes_at.present? && variant.preorder_closes_at > Time.current %>
+                <p class="text-xs text-white/30 mt-0.5">
+                  ปิดรับ: <%= l(variant.preorder_closes_at, format: :short) %>
+                </p>
+              <% end %>
+            <% else %>
+              <p class="text-sm mt-1 <%= variant.in_stock? ? 'text-white/40' : 'text-red-400' %>">
+                <%= variant.in_stock? ? "คงเหลือ #{variant.available_quantity} ใบ" : "หมดสต็อก" %>
+              </p>
+            <% end %>
           </div>
 
-          <% if user_signed_in? && current_user.customer? && variant.in_stock? %>
-            <%= form_with url: cart_items_path, method: :post, class: "flex items-center gap-2" do %>
-              <%= hidden_field_tag :product_variant_id, variant.id %>
-              <%= number_field_tag :quantity, 1, min: 1, max: variant.available_quantity, class: "input-field !w-20 !py-2 text-center" %>
-              <%= submit_tag "ใส่ตะกร้า", class: "btn-primary !py-2 !px-5 text-sm" %>
+          <% if user_signed_in? && current_user.customer? %>
+            <% if variant.is_preorder? && variant.preorder_available? %>
+              <%= form_with url: cart_items_path, method: :post, class: "flex items-center gap-2" do %>
+                <%= hidden_field_tag :product_variant_id, variant.id %>
+                <%= number_field_tag :quantity, 1, min: 1, max: variant.available_quantity, class: "input-field !w-20 !py-2 text-center" %>
+                <%= submit_tag "พรีออเดอร์", class: "btn-primary !py-2 !px-5 text-sm !bg-amber-600 hover:!bg-amber-700" %>
+              <% end %>
+            <% elsif variant.in_stock? && !variant.is_preorder? %>
+              <%= form_with url: cart_items_path, method: :post, class: "flex items-center gap-2" do %>
+                <%= hidden_field_tag :product_variant_id, variant.id %>
+                <%= number_field_tag :quantity, 1, min: 1, max: variant.available_quantity, class: "input-field !w-20 !py-2 text-center" %>
+                <%= submit_tag "ใส่ตะกร้า", class: "btn-primary !py-2 !px-5 text-sm" %>
+              <% end %>
+            <% else %>
+              <span class="text-sm text-red-400/80 font-medium px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/20">
+                <%= variant.is_preorder? ? "พรีออเดอร์เต็ม" : "หมดสต็อก" %>
+              </span>
             <% end %>
           <% elsif !user_signed_in? %>
             <p class="text-sm text-white/40">
               <%= link_to "Login", new_user_session_path, class: "text-violet-400 hover:text-violet-300 transition-colors" %> เพื่อสั่งซื้อ
             </p>
           <% else %>
-            <span class="text-sm text-red-400/80 font-medium px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/20">หมดสต็อก</span>
+            <span class="text-sm text-red-400/80 font-medium px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/20">
+              <%= variant.is_preorder? ? "พรีออเดอร์เต็ม" : "หมดสต็อก" %>
+            </span>
           <% end %>
         </div>
       <% end %>

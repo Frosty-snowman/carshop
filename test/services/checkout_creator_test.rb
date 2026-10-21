@@ -47,4 +47,98 @@ class CheckoutCreatorTest < ActiveSupport::TestCase
       )
     end
   end
+
+  test "creates preorder order item when variant is preorder" do
+    @variant.update!(
+      is_preorder: true,
+      preorder_quota: 20,
+      preorder_reserved: 0,
+      preorder_release_date: 1.month.from_now
+    )
+
+    order = CheckoutCreator.call(
+      user: @customer,
+      params: {
+        recipient_name: "Test",
+        phone: "0812345678",
+        address: "123 Road",
+        postal_code: "10110",
+        payment_method: "bank_transfer",
+        preorder_acknowledged: "1"
+      }
+    )
+
+    order_item = order.order_items.first
+    assert order_item.is_preorder?
+    assert_equal "pending_fulfillment", order_item.preorder_status
+  end
+
+  test "reserves preorder quota for preorder items" do
+    @variant.update!(
+      is_preorder: true,
+      preorder_quota: 20,
+      preorder_reserved: 5,
+      preorder_release_date: 1.month.from_now
+    )
+
+    CheckoutCreator.call(
+      user: @customer,
+      params: {
+        recipient_name: "Test",
+        phone: "0812345678",
+        address: "123 Road",
+        postal_code: "10110",
+        payment_method: "bank_transfer",
+        preorder_acknowledged: "1"
+      }
+    )
+
+    assert_equal 6, @variant.reload.preorder_reserved
+  end
+
+  test "raises error when preorder not acknowledged" do
+    @variant.update!(
+      is_preorder: true,
+      preorder_quota: 20,
+      preorder_reserved: 0,
+      preorder_release_date: 1.month.from_now
+    )
+
+    assert_raises(CheckoutCreator::Error) do
+      CheckoutCreator.call(
+        user: @customer,
+        params: {
+          recipient_name: "Test",
+          phone: "0812345678",
+          address: "123 Road",
+          postal_code: "10110",
+          payment_method: "bank_transfer"
+        }
+      )
+    end
+  end
+
+  test "raises error when preorder quota exceeded" do
+    @variant.update!(
+      is_preorder: true,
+      preorder_quota: 10,
+      preorder_reserved: 9,
+      preorder_release_date: 1.month.from_now
+    )
+    @customer.cart_items.first.update!(quantity: 5)
+
+    assert_raises(CheckoutCreator::Error) do
+      CheckoutCreator.call(
+        user: @customer,
+        params: {
+          recipient_name: "Test",
+          phone: "0812345678",
+          address: "123 Road",
+          postal_code: "10110",
+          payment_method: "bank_transfer",
+          preorder_acknowledged: "1"
+        }
+      )
+    end
+  end
 end

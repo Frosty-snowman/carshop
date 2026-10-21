@@ -24,6 +24,6 @@ class CheckoutsController < ApplicationController
   end
 
   def checkout_params
-    params.require(:checkout).permit(:recipient_name, :phone, :address, :postal_code, :payment_method)
+    params.require(:checkout).permit(:recipient_name, :phone, :address, :postal_code, :payment_method, :preorder_acknowledged)
   end
 end
